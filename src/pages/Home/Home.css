@@ -1,0 +1,57 @@
+.home {
+  min-height: 100vh;
+  background: #fff;
+  color: #000;
+  font-family: "Montserrat", sans-serif;
+}
+
+.home__conteudo {
+  padding: 46px 82px;
+}
+
+.home__saudacao {
+  margin: 0;
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.home__botao {
+  height: 56px;
+  margin-top: 36px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 4px;
+  background: #f00;
+  color: #fff;
+  font: inherit;
+  font-size: 2rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.home__botao:hover {
+  background: #d60000;
+}
+
+.home__botao:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .home__conteudo {
+    padding: 32px 20px;
+  }
+
+  .home__saudacao {
+    font-size: 1.5rem;
+  }
+
+  .home__botao {
+    height: 48px;
+    font-size: 1.25rem;
+  }
+}
