@@ -41,6 +41,20 @@
   outline-offset: 3px;
 }
 
+.home_botoes {
+  display: flex;
+  justify-content: space-between;
+}
+
+.home__mensagem {
+  margin: 24px 0 0;
+  padding: 12px 16px;
+  border-left: 4px solid #1a7f37;
+  background: #eef8f0;
+  color: #14532d;
+  font-size: 1rem;
+}
+
 @media (max-width: 900px) {
   .home__conteudo {
     padding: 32px 20px;

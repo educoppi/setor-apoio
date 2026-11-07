@@ -1,19 +1,38 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoSenai from "../../assets/logo-senai.png";
+import { login } from "../../services/auth";
 import "./Login.css";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [nif, setNif] = useState("");
   const [senha, setSenha] = useState("");
+  const [erro, setErro] = useState("");
+  const [enviando, setEnviando] = useState(false);
   const navigate = useNavigate();
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    if (enviando) return;
 
-    // TODO: integrar com a API de autenticação
-    console.log("Login:", { email, senha });
-    navigate("/home");
+    if (!nif.trim() || !senha) {
+      setErro("Informe o NIF e a senha.");
+      return;
+    }
+
+    setErro("");
+    setEnviando(true);
+    try {
+      await login(nif.trim(), senha);
+      navigate("/home");
+    } catch (error) {
+      setErro(
+        error.status === 401 || error.status === 403
+          ? "NIF ou senha inválidos."
+          : error.message,
+      );
+      setEnviando(false);
+    }
   }
 
   return (
@@ -32,17 +51,17 @@ export default function Login() {
           </p>
           <hr className="login-card__line" />
 
-          <form className="login-form" onSubmit={handleSubmit}>
-            <label className="login-form__label" htmlFor="email">
-              Email:
+          <form className="login-form" onSubmit={handleSubmit} noValidate>
+            <label className="login-form__label" htmlFor="nif">
+              NIF:
             </label>
             <input
               className="login-form__input"
-              id="email"
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="nif"
+              type="text"
+              autoComplete="username"
+              value={nif}
+              onChange={(e) => setNif(e.target.value)}
               required
             />
 
@@ -59,8 +78,14 @@ export default function Login() {
               required
             />
 
-            <button className="login-form__button" type="submit">
-              Avançar
+            {erro && (
+              <p className="login-form__erro" role="alert">
+                {erro}
+              </p>
+            )}
+
+            <button className="login-form__button" type="submit" disabled={enviando}>
+              {enviando ? "Entrando..." : "Avançar"}
             </button>
           </form>
         </section>
