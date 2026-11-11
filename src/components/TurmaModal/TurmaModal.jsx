@@ -166,7 +166,7 @@ export default function TurmaModal({ onFechar, onCriada }) {
             onChange={handleChange}
             disabled={enviando}
           >
-            <option value="">Não informada (padrão: São Carlos)</option>
+            
             {UNIDADES.map((unidade) => (
               <option key={unidade.valor} value={unidade.valor}>
                 {unidade.rotulo}

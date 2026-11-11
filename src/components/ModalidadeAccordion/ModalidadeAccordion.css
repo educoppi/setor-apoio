@@ -1,0 +1,150 @@
+.modalidade {
+  width: 100%;
+}
+
+.modalidade + .modalidade {
+  margin-top: 74px;
+}
+
+.modalidade__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 86px;
+  padding: 12px 56px 12px 26px;
+  border: 1px solid #c4c4c4;
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.2s ease;
+}
+
+.modalidade__cabecalho:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.modalidade__cabecalho:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+.modalidade__titulo {
+  font-size: 2.75rem;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.modalidade__seta {
+  display: flex;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.modalidade--aberta .modalidade__seta {
+  transform: rotate(180deg);
+}
+
+/* Anima a altura de 0 até o conteúdo real (0fr -> 1fr) junto com a opacidade. */
+.modalidade__painel {
+  display: grid;
+  grid-template-rows: 0fr;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.35s ease,
+    opacity 0.3s ease;
+}
+
+.modalidade--aberta .modalidade__painel {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.modalidade__turmas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 84px;
+  min-height: 0;
+  margin: 0;
+  padding: 30px 36px 8px;
+  list-style: none;
+}
+
+.modalidade__turma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  padding: 8px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Cada card surge em sequência ao abrir a aba; --indice vem do componente. */
+.modalidade--aberta .modalidade__turma {
+  animation: turma-aparecer 0.35s ease-out both;
+  animation-delay: calc(min(var(--indice, 0), 10) * 60ms + 120ms);
+}
+
+@keyframes turma-aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modalidade__painel,
+  .modalidade__seta {
+    transition: none;
+  }
+
+  .modalidade--aberta .modalidade__turma {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .modalidade + .modalidade {
+    margin-top: 32px;
+  }
+
+  .modalidade__cabecalho {
+    min-height: 64px;
+    padding: 10px 16px;
+  }
+
+  .modalidade__titulo {
+    font-size: 1.375rem;
+  }
+
+  .modalidade__turmas {
+    gap: 20px;
+    padding: 20px 8px 4px;
+  }
+
+  .modalidade__turma {
+    width: 120px;
+    height: 120px;
+    font-size: 0.875rem;
+  }
+}
