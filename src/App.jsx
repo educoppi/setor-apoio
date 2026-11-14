@@ -14,7 +14,8 @@ export default function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/alunos/novo" element={<AlunoFicha />} />
         <Route path="/alunos/:id" element={<AlunoFicha />} />
-        <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+        <Route path="/admin" element={<AdminUsuarios />} />
+        <Route path="/admin/usuarios" element={<Navigate to="/admin?aba=usuarios" replace />} />
         <Route path="/solicitacoes" element={<Solicitacoes />} />
         <Route path="/atendimentos" element={<Atendimentos />} />
         <Route path="*" element={<Navigate to="/" replace />} />

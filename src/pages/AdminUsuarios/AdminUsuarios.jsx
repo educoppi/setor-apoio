@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import Abas from "../../components/Abas/Abas";
+import DashboardPainel from "../../components/Dashboard/DashboardPainel";
 import Campo from "../../components/Campo/Campo";
 import Header from "../../components/Header/Header";
 import UsuarioModal from "../../components/UsuarioModal/UsuarioModal";
@@ -44,9 +46,20 @@ function IconeVoltar() {
   );
 }
 
-// Ferramentas do administrador: lista todos os usuários e abre a edição de cada um.
+const ABAS = [
+  { id: "dashboard", rotulo: "Dashboard" },
+  { id: "usuarios", rotulo: "Gerenciamento de usuários" },
+];
+const ID_ABAS = "ferramentas-admin";
+
+// Ferramentas do administrador, em duas abas:
+// - Dashboard (padrão): estatísticas de GET /solicitacoes/painel;
+// - Gerenciamento de usuários: lista todos os usuários e abre a edição de cada um.
+// A aba fica na URL (?aba=usuarios) para sobreviver a recarregamentos.
 export default function AdminUsuarios() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const abaAtiva = ABAS.some((a) => a.id === searchParams.get("aba")) ? searchParams.get("aba") : "dashboard";
   const [usuarioLogado, setUsuarioLogado] = useState(getUsuario);
   const [usuarios, setUsuarios] = useState([]);
   const [carregando, setCarregando] = useState(true);
@@ -176,7 +189,11 @@ export default function AdminUsuarios() {
           </button>
           <div>
             <h1 className="admin__titulo">Ferramentas do Administrador</h1>
-            <p className="admin__subtitulo">Usuários do sistema: perfis de acesso, cargos, senhas e situação.</p>
+            <p className="admin__subtitulo">
+              {abaAtiva === "dashboard"
+                ? "Visão geral das solicitações recebidas pelo Setor de Apoio."
+                : "Usuários do sistema: perfis de acesso, cargos, senhas e situação."}
+            </p>
           </div>
         </div>
 
@@ -186,6 +203,33 @@ export default function AdminUsuarios() {
           </p>
         ) : (
           <>
+            <div className="admin__abas">
+              <Abas
+                idBase={ID_ABAS}
+                abas={ABAS}
+                ativa={abaAtiva}
+                onSelecionar={(id) => setSearchParams(id === "dashboard" ? {} : { aba: id }, { replace: true })}
+                rotulo="Ferramentas do administrador"
+              />
+            </div>
+
+            <div
+              id={`${ID_ABAS}-painel-dashboard`}
+              role="tabpanel"
+              aria-labelledby={`${ID_ABAS}-aba-dashboard`}
+              hidden={abaAtiva !== "dashboard"}
+              className="admin__painel"
+            >
+              {abaAtiva === "dashboard" && <DashboardPainel onNaoAutenticado={tratarNaoAutenticado} />}
+            </div>
+
+            <div
+              id={`${ID_ABAS}-painel-usuarios`}
+              role="tabpanel"
+              aria-labelledby={`${ID_ABAS}-aba-usuarios`}
+              hidden={abaAtiva !== "usuarios"}
+              className="admin__painel"
+            >
             <div className="admin__barra">
               <div className="admin__filtros">
                 <Campo
@@ -351,6 +395,7 @@ export default function AdminUsuarios() {
                 )}
               </>
             )}
+            </div>
           </>
         )}
       </main>

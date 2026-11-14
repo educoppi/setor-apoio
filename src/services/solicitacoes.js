@@ -107,3 +107,13 @@ export function finalizarSolicitacao(id, feedback, observacao) {
     body: { feedback, observacao: observacao || undefined },
   });
 }
+
+// PainelResponse: { totais, fila, porMotivo, porCurso, evolucao, inicioPeriodo }.
+// `meses` = período da evolução semanal (padrão da API: 6); `atendenteId` restringe às dela.
+export function buscarPainel({ meses, atendenteId } = {}) {
+  const query = new URLSearchParams();
+  if (meses) query.set("meses", meses);
+  if (atendenteId) query.set("atendenteId", atendenteId);
+  const sufixo = query.toString();
+  return request(`/api/v1/solicitacoes/painel${sufixo ? `?${sufixo}` : ""}`);
+}

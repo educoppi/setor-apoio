@@ -61,7 +61,7 @@ export default function Header({ nome = "", role }) {
           <button
             className="header__admin"
             type="button"
-            onClick={() => navigate("/admin/usuarios")}
+            onClick={() => navigate("/admin")}
           >
             Ferramentas do Administrador
           </button>

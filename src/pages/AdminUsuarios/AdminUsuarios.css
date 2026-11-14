@@ -54,13 +54,28 @@
   font-size: 1rem;
 }
 
+/* ---- Abas (Dashboard | Gerenciamento de usuários) ---- */
+.admin__abas {
+  margin-top: 32px;
+  border-bottom: 1px solid #dedede;
+}
+
+.admin__abas .abas__aba {
+  min-height: 64px;
+  font-size: 1.1rem;
+}
+
+.admin__painel[hidden] {
+  display: none;
+}
+
 /* ---- Filtros + botão novo ---- */
 .admin__barra {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
-  margin-top: 36px;
+  margin-top: 28px;
 }
 
 .admin__filtros {

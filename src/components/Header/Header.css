@@ -125,7 +125,7 @@
   outline-offset: 3px;
 }
 
-@media (max-width: 1380px) {
+@media (max-width: 1600px) {
   .header__acoes {
     gap: 40px;
   }
