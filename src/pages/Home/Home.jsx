@@ -127,7 +127,7 @@ export default function Home() {
 
   return (
     <div className="home">
-      <Header nome={nome} role={usuario?.role} temNotificacao />
+      <Header nome={nome} role={usuario?.role} />
 
       <main className="home__conteudo">
         <h1 className="home__saudacao">

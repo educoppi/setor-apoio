@@ -636,3 +636,24 @@ span.ocorrencia__miniatura-botao {
     padding: 14px;
   }
 }
+
+/* Ocorrência aberta a partir de uma solicitação (link das solicitações recebidas). */
+.ocorrencia__cartao--destaque {
+  border-color: #e30000;
+  box-shadow: 0 0 0 3px rgba(227, 0, 0, 0.18);
+}
+
+.ocorrencia-editor__origem-aviso {
+  margin: 16px 0 0 68px;
+  padding: 10px 14px;
+  border-left: 4px solid #e30000;
+  background: #fff;
+  color: #333;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 640px) {
+  .ocorrencia-editor__origem-aviso {
+    margin-left: 0;
+  }
+}

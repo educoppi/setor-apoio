@@ -107,11 +107,11 @@ function SelecaoSuspensa({ id, rotulo, resumo, erro, children, desabilitado }) {
   );
 }
 
-function CartaoOcorrencia({ ocorrencia: o, podeEditar, onEditar, onExcluir, excluindo, onAbrirImagem }) {
+function CartaoOcorrencia({ ocorrencia: o, destacada, podeEditar, onEditar, onExcluir, excluindo, onAbrirImagem }) {
   const [expandida, setExpandida] = useState(false);
   const longa = (o.descricao ?? "").length > 280;
   return (
-    <li className="ocorrencia__cartao">
+    <li id={`ocorrencia-${o.id}`} className={`ocorrencia__cartao${destacada ? " ocorrencia__cartao--destaque" : ""}`}>
       <div className="ocorrencia__cartao-topo">
         <div>
           <p className="ocorrencia__cartao-data">{formatarDataHora(o.dataHora)}</p>
@@ -169,7 +169,18 @@ function CartaoOcorrencia({ ocorrencia: o, podeEditar, onEditar, onExcluir, excl
 // Aba "Ocorrências" da ficha: histórico de acompanhamento do aluno
 // (GET /alunos/{id}/ocorrencias) e registro/edição (POST e PUT /ocorrencias).
 // O botão SALVAR da barra da ficha chama `salvar()` pelo `ref`.
-export default function OcorrenciasAluno({ ref, aluno, usuario, habilitado, bloqueado, onEditorChange, onNaoAutenticado }) {
+export default function OcorrenciasAluno({
+  ref,
+  aluno,
+  usuario,
+  habilitado,
+  bloqueado,
+  onEditorChange,
+  onNaoAutenticado,
+  novaComSolicitacao,
+  onNovaComSolicitacaoAberta,
+  destaqueId,
+}) {
   const alunoId = aluno?.id;
   const admin = ehAdministrador(usuario);
 
@@ -236,6 +247,27 @@ export default function OcorrenciasAluno({ ref, aluno, usuario, habilitado, bloq
   useEffect(() => {
     onEditorChange?.({ aberto: editorAberto, salvando });
   }, [editorAberto, salvando, onEditorChange]);
+
+  // Vindo de "Registrar ocorrência" nas solicitações recebidas: abre o
+  // registro já com a solicitação associada (uma única vez).
+  const pedidoAtendidoRef = useRef(false);
+  useEffect(() => {
+    if (!novaComSolicitacao || !habilitado || bloqueado || pedidoAtendidoRef.current) return;
+    pedidoAtendidoRef.current = true;
+    const solicitacaoId = Number(novaComSolicitacao);
+    setMensagem("");
+    setErros({});
+    setErroEditor("");
+    setEditor({ id: null, solicitacaoOrigem: solicitacaoId });
+    setForm({ ...EDITOR_VAZIO, solicitacaoIds: [solicitacaoId] });
+    onNovaComSolicitacaoAberta?.();
+  }, [novaComSolicitacao, habilitado, bloqueado, onNovaComSolicitacaoAberta]);
+
+  // Ocorrência pedida pela URL: rola até ela e destaca no histórico.
+  useEffect(() => {
+    if (!destaqueId || carregando || editorAberto) return;
+    document.getElementById(`ocorrencia-${destaqueId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [destaqueId, carregando, editorAberto, ocorrencias]);
 
   // Libera as pré-visualizações locais ao sair.
   const formRef = useRef(form);
@@ -545,6 +577,13 @@ export default function OcorrenciasAluno({ ref, aluno, usuario, habilitado, bloq
           </SelecaoSuspensa>
         </div>
 
+        {editor.solicitacaoOrigem && (
+          <p className="ocorrencia-editor__origem-aviso">
+            Registrando a partir da solicitação #{editor.solicitacaoOrigem}, que já está marcada em
+            “Associar à solicitação”.
+          </p>
+        )}
+
         {(categoriasSelecionadas.length > 0 || form.solicitacaoIds.length > 0) && (
           <div className="ocorrencia__tags ocorrencia-editor__selecionados">
             {[...categoriasSelecionadas, ...categoriasInativas.filter((c) => form.categoriaIds.includes(c.id))].map((c) => (
@@ -644,6 +683,7 @@ export default function OcorrenciasAluno({ ref, aluno, usuario, habilitado, bloq
             <CartaoOcorrencia
               key={ocorrencia.id}
               ocorrencia={ocorrencia}
+              destacada={String(ocorrencia.id) === String(destaqueId)}
               podeEditar={!bloqueado && (admin || ocorrencia.responsavel?.id === usuario?.id)}
               onEditar={abrirEditor}
               onExcluir={handleExcluir}

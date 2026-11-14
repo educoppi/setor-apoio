@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Modal from "../Modal/Modal";
+import AcoesAtendimento from "./AcoesAtendimento";
 import SeloStatus, { EtapasStatus } from "./SeloStatus";
 import { buscarSolicitacao, rotuloMotivo, rotuloStatus, rotuloVisibilidade } from "../../services/solicitacoes";
 import { UNIDADES } from "../../services/turmas";
@@ -22,9 +23,21 @@ function Dado({ rotulo, children }) {
 
 // Detalhe da solicitação (GET /solicitacoes/{id}): relato, andamento, retorno
 // do Setor de Apoio e histórico. A ocorrência associada é registro interno do
-// setor: aqui só se informa que ela existe, sem link nem conteúdo.
-export default function SolicitacaoDetalheModal({ solicitacaoId, usuarioId, onFechar, onNaoAutenticado }) {
+// setor: para o solicitante só se informa que ela existe; com `visaoSetor`
+// mostra-se o número dela. `acoes(solicitacao)` desenha botões extras no rodapé.
+// Com `visaoSetor`, solicitações em aberto mostram o painel de atendimento;
+// `onAlterada` avisa quem abriu o modal para recarregar a lista.
+export default function SolicitacaoDetalheModal({
+  solicitacaoId,
+  usuarioId,
+  visaoSetor = false,
+  acoes,
+  onAlterada,
+  onFechar,
+  onNaoAutenticado,
+}) {
   const [solicitacao, setSolicitacao] = useState(null);
+  const [avisoFinal, setAvisoFinal] = useState("");
   const [erro, setErro] = useState("");
   const [tentativa, setTentativa] = useState(0);
 
@@ -43,6 +56,14 @@ export default function SolicitacaoDetalheModal({ solicitacaoId, usuarioId, onFe
       ativo = false;
     };
   }, [solicitacaoId, tentativa, onNaoAutenticado]);
+
+  // Usa a resposta da ação na hora e recarrega o detalhe para trazer o histórico completo.
+  function handleAtualizada(atualizada, mensagem) {
+    if (atualizada) setSolicitacao((atual) => ({ ...atual, ...atualizada }));
+    if (atualizada?.status === "FINALIZADO") setAvisoFinal(mensagem);
+    setTentativa((t) => t + 1);
+    onAlterada?.();
+  }
 
   const s = solicitacao;
   const minha = s?.solicitante?.id === usuarioId;
@@ -76,10 +97,27 @@ export default function SolicitacaoDetalheModal({ solicitacaoId, usuarioId, onFe
             <EtapasStatus status={s.status} />
           </div>
 
-          {/* ---- Retorno do Setor de Apoio ---- */}
+          {avisoFinal && (
+            <p className="modal__aviso modal__aviso--sucesso" role="status">
+              {avisoFinal}
+            </p>
+          )}
+
+          {visaoSetor && s.status !== "FINALIZADO" && (
+            <AcoesAtendimento
+              key={s.id}
+              solicitacao={s}
+              usuarioId={usuarioId}
+              onAtualizada={handleAtualizada}
+              onNaoAutenticado={onNaoAutenticado}
+            />
+          )}
+
+          {/* ---- Retorno do Setor de Apoio (no painel de atendimento, quando em aberto) ---- */}
+          {(!visaoSetor || s.status === "FINALIZADO" || s.ocorrenciaId) && (
           <div className="modal__bloco">
             <h3 className="modal__bloco-titulo">Retorno do Setor de Apoio</h3>
-            {s.feedback ? (
+            {visaoSetor && s.status !== "FINALIZADO" ? null : s.feedback ? (
               <div className="detalhe-solicitacao__feedback">
                 <p>{s.feedback}</p>
                 {s.dataFinalizacao && <span>Finalizada em {formatarDataHora(s.dataFinalizacao)}</span>}
@@ -91,13 +129,19 @@ export default function SolicitacaoDetalheModal({ solicitacaoId, usuarioId, onFe
                   : "O atendimento está em andamento. O retorno aparecerá aqui quando for registrado."}
               </p>
             )}
-            {s.ocorrenciaId && (
+            {s.ocorrenciaId && visaoSetor && (
+              <p className="modal__aviso modal__aviso--info">
+                Associada à ocorrência #{s.ocorrenciaId}, no histórico de acompanhamento do aluno.
+              </p>
+            )}
+            {s.ocorrenciaId && !visaoSetor && (
               <p className="modal__aviso modal__aviso--info">
                 Esta solicitação está vinculada a um registro de acompanhamento do Setor de Apoio.
                 O conteúdo desse registro é interno e não fica disponível aqui.
               </p>
             )}
           </div>
+          )}
 
           {/* ---- Relato ---- */}
           <div className="modal__bloco">
@@ -154,6 +198,7 @@ export default function SolicitacaoDetalheModal({ solicitacaoId, usuarioId, onFe
         <button type="button" className="modal__botao modal__botao--secundario" onClick={onFechar}>
           Fechar
         </button>
+        {s && acoes?.(s)}
       </div>
     </Modal>
   );

@@ -162,7 +162,7 @@ export default function AdminUsuarios() {
 
   return (
     <div className="admin">
-      <Header nome={usuarioLogado?.nome ?? ""} role={usuarioLogado?.role} temNotificacao />
+      <Header nome={usuarioLogado?.nome ?? ""} role={usuarioLogado?.role} />
 
       <main className="admin__conteudo">
         <div className="admin__topo">

@@ -461,3 +461,118 @@
     font-size: 0.75rem;
   }
 }
+
+/* ---- Painel de atendimento (Setor de Apoio) ---- */
+.acoes-atendimento {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.acoes-atendimento .modal__bloco-titulo {
+  margin-bottom: 0;
+}
+
+.acoes-atendimento__passo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.acoes-atendimento__passo--destaque {
+  border-color: #e30000;
+  box-shadow: 0 0 0 1px #e30000 inset;
+  background: #fffafa;
+}
+
+.acoes-atendimento__passo-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.acoes-atendimento__numero {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e30000;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.acoes-atendimento__passo-titulo {
+  margin: 0;
+  font-weight: 600;
+}
+
+.acoes-atendimento__passo-texto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 2px 0 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.acoes-atendimento__voce {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.acoes-atendimento__atendente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.acoes-atendimento__repassar summary {
+  width: fit-content;
+  color: #c40000;
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.acoes-atendimento__repassar[open] summary {
+  margin-bottom: 12px;
+}
+
+.acoes-atendimento__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.acoes-atendimento__feedback .campo__controle {
+  height: auto;
+  min-height: 120px;
+  padding: 12px;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.acoes-atendimento__dica {
+  margin: 0;
+  color: #666;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .acoes-atendimento__botoes .modal__botao {
+    flex: 1;
+  }
+}

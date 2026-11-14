@@ -1,0 +1,221 @@
+/* Reaproveita o visual da área de solicitações (Solicitacoes.css) e acrescenta
+   o que é próprio da fila do Setor de Apoio. */
+.atendimentos__topo {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-left: -16px;
+}
+
+.atendimentos__voltar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #000;
+  cursor: pointer;
+}
+
+.atendimentos__voltar:hover {
+  background: #f0f0f0;
+}
+
+.atendimentos__voltar:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: 2px;
+}
+
+.atendimentos__subtitulo {
+  max-width: 760px;
+  margin: 8px 0 0;
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.atendimentos__barra {
+  align-items: center;
+  margin-top: 32px;
+}
+
+/* ---- Interruptor "Ver finalizadas" ---- */
+.atendimentos__alternar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.98rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.atendimentos__alternar input {
+  position: absolute;
+  opacity: 0;
+}
+
+.atendimentos__alternar-trilho {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  background: #c4c4c4;
+  transition: background-color 0.15s ease;
+}
+
+.atendimentos__alternar-trilho::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.atendimentos__alternar input:checked + .atendimentos__alternar-trilho {
+  background: #e30000;
+}
+
+.atendimentos__alternar input:checked + .atendimentos__alternar-trilho::after {
+  transform: translateX(20px);
+}
+
+.atendimentos__alternar input:focus-visible + .atendimentos__alternar-trilho {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.atendimentos__filtros {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  max-width: 1100px;
+  margin-top: 20px;
+}
+
+/* ---- Cartão com ações ---- */
+.atendimentos__item {
+  display: flex;
+}
+
+.atendimentos__cartao {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #c4c4c4;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.atendimentos__cartao:hover {
+  border-color: #e30000;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* Em aberto há uma semana ou mais. */
+.atendimentos__cartao--parada {
+  border-left: 4px solid #e30000;
+}
+
+.atendimentos__cartao-corpo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 18px 20px 14px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.atendimentos__cartao-corpo:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: -4px;
+}
+
+.atendimentos__cartao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  padding: 12px 20px;
+  border-top: 1px solid #ececec;
+  background: #fafafa;
+}
+
+.atendimentos__vinculo {
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.atendimentos__vinculo--sem {
+  color: #777;
+  font-weight: 400;
+}
+
+.atendimentos__acao {
+  height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 4px;
+  background: #e30000;
+  color: #fff;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.15s ease;
+}
+
+.atendimentos__acao:hover {
+  background: #c40000;
+}
+
+.atendimentos__acao--secundaria {
+  border: 1px solid #e30000;
+  background: #fff;
+  color: #e30000;
+  box-shadow: none;
+}
+
+.atendimentos__acao--secundaria:hover {
+  background: #fdecec;
+}
+
+.atendimentos__acao:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .atendimentos__topo {
+    margin-left: -8px;
+  }
+
+  .atendimentos__filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .atendimentos__acao {
+    flex: 1;
+  }
+}

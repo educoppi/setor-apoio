@@ -44,8 +44,8 @@ export function rotuloVisibilidade(valor) {
 
 // GET /solicitacoes (paginado, mais recentes primeiro). Filtros: status, motivo,
 // turmaId, alunoId, minhas, emAberto... Parâmetros vazios não são enviados.
-export function listarSolicitacoes(filtros = {}, pagina = 0, tamanho = 10) {
-  const query = new URLSearchParams({ page: pagina, size: tamanho, sort: "dataHora,DESC" });
+export function listarSolicitacoes(filtros = {}, pagina = 0, tamanho = 10, ordem = "dataHora,DESC") {
+  const query = new URLSearchParams({ page: pagina, size: tamanho, sort: ordem });
   for (const [chave, valor] of Object.entries(filtros)) {
     if (valor !== undefined && valor !== null && valor !== "" && valor !== false) query.set(chave, valor);
   }
@@ -75,4 +75,35 @@ export function buscarAlunosParaSolicitacao(busca) {
 // Funcionárias do setor de apoio que podem atender.
 export function listarAtendentes() {
   return request("/api/v1/solicitacoes/atendentes");
+}
+
+// ---- Ações do Setor de Apoio ----
+
+// AGUARDANDO_ACOMPANHAMENTO → EM_ANDAMENTO (→ FINALIZADO). Observação vai para o histórico.
+export function alterarStatus(id, status, observacao) {
+  return request(`/api/v1/solicitacoes/${id}/status`, {
+    method: "PATCH",
+    body: { status, observacao: observacao || undefined },
+  });
+}
+
+// Retorno ao solicitante (pode ser salvo antes de finalizar).
+export function registrarFeedback(id, feedback) {
+  return request(`/api/v1/solicitacoes/${id}/feedback`, { method: "PATCH", body: { feedback } });
+}
+
+// Repassa para outra atendente (não vale para finalizadas; fica no histórico).
+export function repassarAtendente(id, atendenteId, observacao) {
+  return request(`/api/v1/solicitacoes/${id}/atendente`, {
+    method: "PATCH",
+    body: { atendenteId, observacao: observacao || undefined },
+  });
+}
+
+// Grava o feedback (obrigatório) e finaliza numa única operação.
+export function finalizarSolicitacao(id, feedback, observacao) {
+  return request(`/api/v1/solicitacoes/${id}/finalizar`, {
+    method: "POST",
+    body: { feedback, observacao: observacao || undefined },
+  });
 }

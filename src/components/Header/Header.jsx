@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logoSenai from "../../assets/logo-senai-preto.png";
-import { ROLE_ADMIN } from "../../services/usuarios";
+import { listarSolicitacoes } from "../../services/solicitacoes";
+import { ROLE_ADMIN, ROLE_SOLICITANTE } from "../../services/usuarios";
 import "./Header.css";
 
 function IconeSino() {
@@ -21,12 +23,30 @@ function IconeSino() {
   );
 }
 
-// `role` vem do usuário logado: administradores veem o atalho para as
-// ferramentas do administrador no lugar do sino de notificações.
-export default function Header({ nome = "", role, temNotificacao = false }) {
+// `role` vem do usuário logado:
+// - administrador: atalho para as ferramentas do administrador;
+// - solicitante: sem sino (acompanha tudo na própria área de solicitações);
+// - demais (operacional): sino que leva às solicitações recebidas pelo setor.
+export default function Header({ nome = "", role }) {
   const navigate = useNavigate();
   const inicial = nome.trim().charAt(0).toUpperCase();
   const admin = role === ROLE_ADMIN;
+  const solicitante = role === ROLE_SOLICITANTE;
+  const mostraSino = Boolean(role) && !admin && !solicitante;
+
+  // O ponto vermelho indica que há solicitações aguardando atendimento.
+  const [aguardando, setAguardando] = useState(0);
+  useEffect(() => {
+    if (!mostraSino) return undefined;
+    let ativo = true;
+    listarSolicitacoes({ status: "AGUARDANDO_ACOMPANHAMENTO" }, 0, 1)
+      .then((dados) => ativo && setAguardando(dados?.page?.totalElements ?? 0))
+      .catch(() => {});
+    return () => {
+      ativo = false;
+    };
+  }, [mostraSino]);
+  const temNotificacao = aguardando > 0;
 
   return (
     <header className="header">
@@ -45,12 +65,16 @@ export default function Header({ nome = "", role, temNotificacao = false }) {
           >
             Ferramentas do Administrador
           </button>
-        ) : (
+        ) : !mostraSino ? null : (
         <button
           className="header__sino"
           type="button"
+          onClick={() => navigate("/atendimentos")}
+          title="Solicitações recebidas"
           aria-label={
-            temNotificacao ? "Notificações (há novas)" : "Notificações"
+            temNotificacao
+              ? `Solicitações recebidas (${aguardando} aguardando atendimento)`
+              : "Solicitações recebidas"
           }
         >
           <IconeSino />

@@ -117,15 +117,48 @@ function IconeVoltar() {
   );
 }
 
-// Rota: /alunos/novo (sem id) ou /alunos/:id?turma=<id da turma de origem>.
+// Rota: /alunos/novo (sem id) ou /alunos/:id com parâmetros opcionais:
+// - turma: turma de origem (escolhe o vínculo e volta ao modal dela);
+// - aba: aba inicial (ex.: "ocorrencias");
+// - novaOcorrencia: id de solicitação — abre o registro de ocorrência já associado a ela;
+// - ocorrencia: id de uma ocorrência a destacar no histórico;
+// - origem=atendimentos: o voltar leva às solicitações recebidas.
 // A `key` remonta a ficha ao trocar de aluno, sem herdar estado do anterior.
 export default function AlunoFichaPagina() {
   const { id } = useParams();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const turmaOrigemId = searchParams.get("turma");
+  const pedidos = {
+    abaInicial: searchParams.get("aba"),
+    novaOcorrencia: searchParams.get("novaOcorrencia"),
+    ocorrenciaDestaque: searchParams.get("ocorrencia"),
+    origem: searchParams.get("origem"),
+  };
+  // Depois de abrir o registro pedido, tira o parâmetro da URL para que um
+  // recarregamento não abra outra ocorrência.
+  const consumirNovaOcorrencia = useCallback(
+    () =>
+      setSearchParams(
+        (atuais) => {
+          const proximos = new URLSearchParams(atuais);
+          proximos.delete("novaOcorrencia");
+          return proximos;
+        },
+        { replace: true },
+      ),
+    [setSearchParams],
+  );
   // A ficha completa é restrita ao Setor de Apoio (solicitantes não têm acesso).
   if (ehSolicitante(getUsuario())) return <Navigate to="/solicitacoes" replace />;
-  return <AlunoFicha key={id ?? "novo"} alunoId={id} turmaOrigemId={turmaOrigemId} />;
+  return (
+    <AlunoFicha
+      key={id ?? "novo"}
+      alunoId={id}
+      turmaOrigemId={turmaOrigemId}
+      pedidos={pedidos}
+      onNovaOcorrenciaAberta={consumirNovaOcorrencia}
+    />
+  );
 }
 
 // Ficha do aluno. Uma única tela para os modos:
@@ -133,7 +166,7 @@ export default function AlunoFichaPagina() {
 // - view: ficha cadastrada (GET /alunos/{id} ou logo após o POST), somente leitura;
 // - edit: ficha cadastrada em edição (PUT /alunos/{id}). Também usado quando o
 //   aluno ainda não tem matrícula: aí só matrícula e turma ficam liberadas.
-function AlunoFicha({ alunoId, turmaOrigemId }) {
+function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAberta }) {
   const navigate = useNavigate();
   const [usuario] = useState(getUsuario);
   const idValido = alunoId === undefined || /^\d+$/.test(alunoId);
@@ -142,7 +175,9 @@ function AlunoFicha({ alunoId, turmaOrigemId }) {
   const [tocados, setTocados] = useState({});
   const [tentouSalvar, setTentouSalvar] = useState(false);
   const [errosApi, setErrosApi] = useState({});
-  const [abaAtiva, setAbaAtiva] = useState(ABAS[0].id);
+  const [abaAtiva, setAbaAtiva] = useState(() =>
+    ABAS.some((aba) => aba.id === pedidos.abaInicial) ? pedidos.abaInicial : ABAS[0].id,
+  );
   // Editor de ocorrência (aba Ocorrências): o SALVAR da barra passa a gravar a ocorrência.
   const ocorrenciasRef = useRef(null);
   const [editorOcorrencia, setEditorOcorrencia] = useState({ aberto: false, salvando: false });
@@ -434,6 +469,11 @@ function AlunoFicha({ alunoId, turmaOrigemId }) {
         : "Descartar os dados preenchidos?";
       if (!window.confirm(pergunta)) return;
     }
+    // Veio das solicitações recebidas: volta para elas.
+    if (pedidos.origem === "atendimentos") {
+      navigate("/atendimentos");
+      return;
+    }
     // Veio do modal de uma turma: volta para a página inicial com ele aberto.
     navigate("/home", turmaOrigemId ? { state: { turmaId: Number(turmaOrigemId) } } : undefined);
   }
@@ -448,7 +488,7 @@ function AlunoFicha({ alunoId, turmaOrigemId }) {
   if (carregandoAluno || erroAluno) {
     return (
       <div className="ficha">
-        <Header nome={usuario?.nome ?? ""} role={usuario?.role} temNotificacao />
+        <Header nome={usuario?.nome ?? ""} role={usuario?.role} />
         <main className="ficha__carregamento">
           <button
             type="button"
@@ -498,7 +538,7 @@ function AlunoFicha({ alunoId, turmaOrigemId }) {
 
   return (
     <div className={`ficha ficha--${modo}`}>
-      <Header nome={usuario?.nome ?? ""} role={usuario?.role} temNotificacao />
+      <Header nome={usuario?.nome ?? ""} role={usuario?.role} />
 
       <form className="ficha__principal" onSubmit={handleSalvar} noValidate>
         <section className="ficha__topo" aria-label="Dados principais do aluno">
@@ -702,6 +742,9 @@ function AlunoFicha({ alunoId, turmaOrigemId }) {
                   habilitado={Boolean(aluno)}
                   bloqueado={editando}
                   onEditorChange={setEditorOcorrencia}
+                  novaComSolicitacao={pedidos.novaOcorrencia}
+                  onNovaComSolicitacaoAberta={onNovaOcorrenciaAberta}
+                  destaqueId={pedidos.ocorrenciaDestaque}
                   onNaoAutenticado={tratarNaoAutenticado}
                 />
               )}

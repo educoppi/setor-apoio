@@ -194,7 +194,7 @@ export default function Solicitacoes() {
 
   return (
     <div className="solicitacoes">
-      <Header nome={nome} role={usuario?.role} temNotificacao />
+      <Header nome={nome} role={usuario?.role} />
 
       <main className="solicitacoes__conteudo">
         <h1 className="solicitacoes__saudacao">
