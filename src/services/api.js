@@ -31,7 +31,9 @@ function mensagemPadrao(status) {
   return "Não foi possível concluir a requisição.";
 }
 
-export async function request(path, { method = "GET", body, auth = true } = {}) {
+// `manterSessaoEm401`: não apaga o token num 401 (ex.: senha atual incorreta
+// na troca de senha não deve derrubar a sessão).
+export async function request(path, { method = "GET", body, auth = true, manterSessaoEm401 = false } = {}) {
   // FormData (upload de arquivos) vai como multipart: o navegador define o Content-Type.
   const multipart = body instanceof FormData;
   const headers = { Accept: "application/json" };
@@ -62,7 +64,7 @@ export async function request(path, { method = "GET", body, auth = true } = {}) 
   }
 
   if (!response.ok) {
-    if (response.status === 401 && auth) setToken(null);
+    if (response.status === 401 && auth && !manterSessaoEm401) setToken(null);
     throw new ApiError(
       dados?.detail || dados?.title || mensagemPadrao(response.status),
       response.status,

@@ -1,0 +1,128 @@
+.menu-usuario {
+  position: relative;
+}
+
+.menu-usuario .header__avatar[aria-expanded="true"] {
+  border-color: #f00;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.15);
+}
+
+.menu-usuario__painel {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  z-index: 90;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  padding: 8px;
+  border: 1px solid #d6d6d6;
+  border-radius: 12px;
+  background: #fff;
+  color: #000;
+  font-family: "Montserrat", sans-serif;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  animation: menu-usuario-abrir 0.14s ease-out;
+}
+
+/* Setinha apontando para o avatar. */
+.menu-usuario__painel::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  right: 38px;
+  width: 12px;
+  height: 12px;
+  border-top: 1px solid #d6d6d6;
+  border-left: 1px solid #d6d6d6;
+  background: #fff;
+  transform: rotate(45deg);
+}
+
+@keyframes menu-usuario-abrir {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.menu-usuario__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+  padding: 10px 10px 14px;
+  border-bottom: 1px solid #ececec;
+}
+
+.menu-usuario__avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  font-size: 1.4rem;
+}
+
+.menu-usuario__identidade {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.menu-usuario__nome {
+  overflow: hidden;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menu-usuario__perfil {
+  color: #666;
+  font-size: 0.82rem;
+}
+
+.menu-usuario__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 13px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  font-size: 1.1rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu-usuario__item:hover,
+.menu-usuario__item:focus-visible {
+  outline: none;
+  background: #f4f4f4;
+}
+
+.menu-usuario__item--sair {
+  color: #c40000;
+}
+
+.menu-usuario__item--sair:hover,
+.menu-usuario__item--sair:focus-visible {
+  background: #fdecec;
+}
+
+.menu-usuario__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .menu-usuario__painel::before {
+    right: 18px;
+  }
+}

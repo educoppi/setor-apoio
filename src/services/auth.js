@@ -36,3 +36,8 @@ export function logout() {
   setToken(null);
   setUsuario(null);
 }
+
+// PUT /auth/senha: { senhaAtual, novaSenha (8 a 72 caracteres) } → 204.
+export function alterarMinhaSenha(senhaAtual, novaSenha) {
+  return request("/api/v1/auth/senha", { method: "PUT", body: { senhaAtual, novaSenha }, manterSessaoEm401: true });
+}

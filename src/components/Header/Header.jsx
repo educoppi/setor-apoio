@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logoSenai from "../../assets/logo-senai-preto.png";
+import MenuUsuario from "../MenuUsuario/MenuUsuario";
 import { listarSolicitacoes } from "../../services/solicitacoes";
 import { ROLE_ADMIN, ROLE_SOLICITANTE } from "../../services/usuarios";
 import "./Header.css";
@@ -29,7 +30,6 @@ function IconeSino() {
 // - demais (operacional): sino que leva às solicitações recebidas pelo setor.
 export default function Header({ nome = "", role }) {
   const navigate = useNavigate();
-  const inicial = nome.trim().charAt(0).toUpperCase();
   const admin = role === ROLE_ADMIN;
   const solicitante = role === ROLE_SOLICITANTE;
   const mostraSino = Boolean(role) && !admin && !solicitante;
@@ -82,9 +82,7 @@ export default function Header({ nome = "", role }) {
         </button>
         )}
 
-        <button className="header__avatar" type="button" aria-label="Menu do usuário">
-          {inicial}
-        </button>
+        <MenuUsuario nome={nome} role={role} />
       </div>
     </header>
   );
