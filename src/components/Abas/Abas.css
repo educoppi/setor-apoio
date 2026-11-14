@@ -1,0 +1,80 @@
+.abas {
+  display: flex;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.abas__aba {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  min-height: 92px;
+  padding: 0 22px;
+  border: 1px solid #dedede;
+  border-bottom: 0;
+  background: #fff;
+  color: #000;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.abas__aba + .abas__aba {
+  border-left: 0;
+}
+
+.abas__aba:hover {
+  background: #f6f6f6;
+}
+
+/* A aba ativa usa o mesmo cinza da área de conteúdo, "abrindo" para ela. */
+.abas__aba--ativa,
+.abas__aba--ativa:hover {
+  background: #ededed;
+  font-weight: 400;
+}
+
+.abas__aba--ativa::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: #e30000;
+}
+
+.abas__aba:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: -4px;
+}
+
+.abas__alerta {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 12px;
+  background: #e30000;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+@media (max-width: 900px) {
+  .abas__aba {
+    min-height: 60px;
+    padding: 0 16px;
+    font-size: 1rem;
+  }
+}

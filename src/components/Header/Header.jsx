@@ -1,4 +1,6 @@
+import { Link, useNavigate } from "react-router-dom";
 import logoSenai from "../../assets/logo-senai-preto.png";
+import { ROLE_ADMIN } from "../../services/usuarios";
 import "./Header.css";
 
 function IconeSino() {
@@ -19,18 +21,31 @@ function IconeSino() {
   );
 }
 
-export default function Header({ nome = "", temNotificacao = false }) {
+// `role` vem do usuário logado: administradores veem o atalho para as
+// ferramentas do administrador no lugar do sino de notificações.
+export default function Header({ nome = "", role, temNotificacao = false }) {
+  const navigate = useNavigate();
   const inicial = nome.trim().charAt(0).toUpperCase();
+  const admin = role === ROLE_ADMIN;
 
   return (
     <header className="header">
-      <div className="header__marca">
-        <img className="header__logo" src={logoSenai} alt="SENAI" />
+      <Link className="header__marca" to="/home" aria-label="SENAI Setor de Apoio — página inicial">
+        <img className="header__logo" src={logoSenai} alt="" />
         <span className="header__divisor" aria-hidden="true" />
-        <h2 className="header__titulo">SETOR DE APOIO</h2>
-      </div>
+        <span className="header__titulo">SETOR DE APOIO</span>
+      </Link>
 
       <div className="header__acoes">
+        {admin ? (
+          <button
+            className="header__admin"
+            type="button"
+            onClick={() => navigate("/admin/usuarios")}
+          >
+            Ferramentas do Administrador
+          </button>
+        ) : (
         <button
           className="header__sino"
           type="button"
@@ -41,6 +56,7 @@ export default function Header({ nome = "", temNotificacao = false }) {
           <IconeSino />
           {temNotificacao && <span className="header__sino-ponto" />}
         </button>
+        )}
 
         <button className="header__avatar" type="button" aria-label="Menu do usuário">
           {inicial}

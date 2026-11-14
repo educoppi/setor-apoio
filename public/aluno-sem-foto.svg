@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250" role="img" aria-label="Aluno sem foto">
+  <rect width="250" height="250" fill="#fff"/>
+  <path d="M21 245a104 104 0 0 1 208 0" fill="none" stroke="#000" stroke-width="24"/>
+  <circle cx="125" cy="80" r="62" fill="#fff" stroke="#fff" stroke-width="44"/>
+  <circle cx="125" cy="80" r="62" fill="none" stroke="#000" stroke-width="24"/>
+</svg>

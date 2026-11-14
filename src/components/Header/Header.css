@@ -15,6 +15,13 @@
   display: flex;
   align-items: center;
   gap: 28px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.header__marca:focus-visible {
+  outline: 2px solid #f00;
+  outline-offset: 6px;
 }
 
 .header__logo {
@@ -31,6 +38,7 @@
 }
 
 .header__titulo {
+  display: block;
   margin: 0;
   font-size: 2.5rem;
   font-weight: 300;
@@ -88,10 +96,43 @@
   cursor: pointer;
 }
 
+/* Atalho do administrador (substitui o sino): contorno vermelho. */
+.header__admin {
+  height: 56px;
+  padding: 0 10px;
+  border: 1px solid #f00;
+  border-radius: 4px;
+  background: #fff;
+  color: #f00;
+  font: inherit;
+  font-size: 2rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.header__admin:hover {
+  background: #f00;
+  color: #fff;
+}
+
+.header__admin:focus-visible,
 .header__sino:focus-visible,
 .header__avatar:focus-visible {
   outline: 2px solid #f00;
   outline-offset: 3px;
+}
+
+@media (max-width: 1380px) {
+  .header__acoes {
+    gap: 40px;
+  }
+
+  .header__admin {
+    font-size: 1.4rem;
+  }
 }
 
 @media (max-width: 900px) {
@@ -121,6 +162,14 @@
     gap: 20px;
   }
 
+  .header__admin {
+    height: 40px;
+    font-size: 0.95rem;
+    white-space: normal;
+    line-height: 1.15;
+    max-width: 180px;
+  }
+
   .header__sino,
   .header__sino-icone {
     width: 36px;
@@ -142,6 +191,17 @@
 }
 
 @media (max-width: 520px) {
+  .header__acoes {
+    gap: 12px;
+  }
+
+  .header__admin {
+    max-width: 130px;
+    height: 44px;
+    padding: 0 8px;
+    font-size: 0.78rem;
+  }
+
   .header__titulo {
     display: none;
   }

@@ -16,7 +16,7 @@ function IconeSeta() {
   );
 }
 
-export default function ModalidadeAccordion({ titulo, turmas }) {
+export default function ModalidadeAccordion({ titulo, turmas, onSelecionarTurma }) {
   const [aberto, setAberto] = useState(false);
   const painelId = useId();
 
@@ -38,13 +38,16 @@ export default function ModalidadeAccordion({ titulo, turmas }) {
       <div id={painelId} className="modalidade__painel" role="region" inert={!aberto}>
         <ul className="modalidade__turmas">
           {turmas.map((turma, indice) => (
-            <li
-              key={turma.id}
-              className="modalidade__turma"
-              style={{ backgroundColor: turma.cor, "--indice": indice }}
-              title={turma.nome}
-            >
-              {turma.nome}
+            <li key={turma.id}>
+              <button
+                type="button"
+                className="modalidade__turma"
+                style={{ backgroundColor: turma.cor, "--indice": indice }}
+                title={`Ver alunos de ${turma.nome}`}
+                onClick={() => onSelecionarTurma?.(turma)}
+              >
+                {turma.nome}
+              </button>
             </li>
           ))}
         </ul>

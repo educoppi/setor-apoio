@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import AlunosTurmaModal from "../../components/AlunosTurmaModal/AlunosTurmaModal";
 import Header from "../../components/Header/Header";
 import ModalidadeAccordion from "../../components/ModalidadeAccordion/ModalidadeAccordion";
 import TurmaModal from "../../components/TurmaModal/TurmaModal";
 import { getToken } from "../../services/api";
 import { buscarUsuarioLogado, getUsuario, logout } from "../../services/auth";
 import { listarTurmas } from "../../services/turmas";
+import { ehSolicitante } from "../../services/usuarios";
 import "./Home.css";
 
 // A ordem do array define a ordem das abas na tela.
 const MODALIDADES = [
   { sigla: "CT", titulo: "Curso Técnico" },
-  { sigla: "CAT", titulo: "Curso de Aprendizagem Industrial" },
+  { sigla: "CAI", titulo: "Curso de Aprendizagem Industrial" },
   { sigla: "CST", titulo: "Curso Superior de Tecnologia" },
 ];
 
@@ -36,12 +38,16 @@ function atribuirCores(turmas, anteriores) {
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [usuario, setUsuario] = useState(getUsuario);
   const [modalTurmaAberto, setModalTurmaAberto] = useState(false);
   const [mensagem, setMensagem] = useState("");
   const [turmas, setTurmas] = useState([]);
   const [carregandoTurmas, setCarregandoTurmas] = useState(true);
   const [erroTurmas, setErroTurmas] = useState("");
+  // Turma com o modal de alunos aberto. Ao voltar da ficha de um aluno, a ficha
+  // devolve o id em `location.state` para reabrir a mesma turma.
+  const [turmaAbertaId, setTurmaAbertaId] = useState(() => location.state?.turmaId ?? null);
 
   const tratarNaoAutenticado = useCallback(
     (error) => {
@@ -68,7 +74,7 @@ export default function Home() {
   );
 
   useEffect(() => {
-    if (!getToken()) return;
+    if (!getToken() || ehSolicitante(getUsuario())) return;
     buscarUsuarioLogado().then(setUsuario).catch(tratarNaoAutenticado);
     carregarTurmas();
   }, [tratarNaoAutenticado, carregarTurmas]);
@@ -83,19 +89,34 @@ export default function Home() {
     [turmas],
   );
 
+  // Limpa o estado do histórico para não reabrir o modal num recarregamento.
+  useEffect(() => {
+    if (location.state?.turmaId) navigate(location.pathname, { replace: true, state: null });
+  }, [location.state, location.pathname, navigate]);
+
   const fecharModalTurma = useCallback(() => setModalTurmaAberto(false), []);
+  const fecharModalAlunos = useCallback(() => setTurmaAbertaId(null), []);
+
+  // Só existe depois que a lista carrega (e some se a turma deixar de existir).
+  const turmaAberta = turmas.find((turma) => turma.id === turmaAbertaId) ?? null;
 
   if (!getToken()) return <Navigate to="/" replace />;
+  // Solicitantes têm a própria página inicial (solicitações).
+  if (ehSolicitante(usuario)) return <Navigate to="/solicitacoes" replace />;
 
   const nome = usuario?.nome ?? "";
 
   function handleNovoAluno() {
-    // TODO: abrir o cadastro de aluno
+    navigate("/alunos/novo");
   }
 
   function handleNovaTurma() {
     setMensagem("");
     setModalTurmaAberto(true);
+  }
+
+  function handleSelecionarAluno(aluno) {
+    navigate(`/alunos/${aluno.id}?turma=${turmaAbertaId}`);
   }
 
   function handleTurmaCriada(turma) {
@@ -106,7 +127,7 @@ export default function Home() {
 
   return (
     <div className="home">
-      <Header nome={nome} temNotificacao />
+      <Header nome={nome} role={usuario?.role} temNotificacao />
 
       <main className="home__conteudo">
         <h1 className="home__saudacao">
@@ -143,10 +164,24 @@ export default function Home() {
           )}
 
           {grupos.map((grupo) => (
-            <ModalidadeAccordion key={grupo.sigla} titulo={grupo.titulo} turmas={grupo.turmas} />
+            <ModalidadeAccordion
+              key={grupo.sigla}
+              titulo={grupo.titulo}
+              turmas={grupo.turmas}
+              onSelecionarTurma={(turma) => setTurmaAbertaId(turma.id)}
+            />
           ))}
         </div>
       </main>
+
+      {turmaAberta && (
+        <AlunosTurmaModal
+          turma={turmaAberta}
+          onFechar={fecharModalAlunos}
+          onSelecionarAluno={handleSelecionarAluno}
+          onNaoAutenticado={tratarNaoAutenticado}
+        />
+      )}
 
       {modalTurmaAberto && (
         <TurmaModal onFechar={fecharModalTurma} onCriada={handleTurmaCriada} />

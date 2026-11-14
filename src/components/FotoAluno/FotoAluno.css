@@ -1,0 +1,83 @@
+.foto-aluno {
+  width: 250px;
+}
+
+.foto-aluno__botao {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #cfcfcf;
+  background: #fff;
+  cursor: pointer;
+}
+
+.foto-aluno__botao:disabled {
+  cursor: default;
+}
+
+.foto-aluno__imagem {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foto-aluno__acao {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.foto-aluno__botao:hover .foto-aluno__acao,
+.foto-aluno__botao:focus-visible .foto-aluno__acao {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.foto-aluno__botao:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: 3px;
+}
+
+.foto-aluno__input {
+  display: none;
+}
+
+.foto-aluno__erro {
+  margin: 8px 0 0;
+  color: #c40000;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+/* Em telas de toque não há hover: deixa a dica sempre visível. */
+@media (hover: none) {
+  .foto-aluno__acao {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .foto-aluno {
+    width: 150px;
+  }
+
+  .foto-aluno__acao {
+    padding: 6px;
+    font-size: 0.75rem;
+  }
+}
