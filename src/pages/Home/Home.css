@@ -43,7 +43,45 @@
 
 .home_botoes {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 16px;
+}
+
+/* Turmas e Cursos: cadastros, com contorno (o vermelho cheio fica para "+ ALUNO"). */
+.home__cadastros {
+  display: flex;
+  gap: 16px;
+}
+
+.home__cadastro {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  margin-top: 36px;
+  padding: 0 20px;
+  border: 1px solid #f00;
+  border-radius: 4px;
+  background: #fff;
+  color: #f00;
+  font: inherit;
+  font-size: 1.6rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.home__cadastro:hover {
+  background: #f00;
+  color: #fff;
+}
+
+.home__cadastro:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
 }
 
 .home__mensagem {
@@ -88,5 +126,20 @@
   .home__botao {
     height: 48px;
     font-size: 1.25rem;
+  }
+
+  .home__cadastros {
+    gap: 10px;
+  }
+
+  .home__cadastro {
+    height: 48px;
+    padding: 0 14px;
+    font-size: 1.1rem;
+  }
+
+  .home__cadastro svg {
+    width: 22px;
+    height: 22px;
   }
 }

@@ -1,0 +1,325 @@
+/* Peças comuns aos modais de Turmas e Cursos (lista + formulário). */
+
+.cadastro__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.cadastro__filtros {
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(180px, 2fr) repeat(3, minmax(130px, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.cadastro__filtros--3 {
+  grid-template-columns: minmax(180px, 2fr) repeat(2, minmax(130px, 1fr));
+}
+
+.cadastro__novo {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 4px;
+  background: #e30000;
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.cadastro__novo:hover {
+  background: #c40000;
+}
+
+.cadastro__novo:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.cadastro__resumo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 10px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.cadastro__limpar {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c40000;
+  font: inherit;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.cadastro__aviso {
+  margin: 20px 0 0;
+  color: #555;
+  text-align: center;
+}
+
+/* ---- Tabela ---- */
+.cadastro__tabela-area {
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+}
+
+.cadastro__tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.cadastro__tabela th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 11px 14px;
+  border-bottom: 1px solid #d6d6d6;
+  background: #f5f5f5;
+  color: #444;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cadastro__tabela td {
+  padding: 11px 14px;
+  border-bottom: 1px solid #ededed;
+  vertical-align: middle;
+}
+
+.cadastro__tabela tbody tr {
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.cadastro__tabela tbody tr:hover {
+  background: #fdf5f5;
+}
+
+.cadastro__tabela tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.cadastro__linha--inativa td {
+  color: #777;
+}
+
+.cadastro__nome {
+  font-weight: 500;
+}
+
+.cadastro__sub {
+  display: block;
+  margin-top: 2px;
+  color: #666;
+  font-size: 0.82rem;
+}
+
+.cadastro__acoes {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cadastro__editar {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #e30000;
+  border-radius: 4px;
+  background: #fff;
+  color: #e30000;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cadastro__editar:hover {
+  background: #e30000;
+  color: #fff;
+}
+
+.cadastro__situacao {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cadastro__situacao--ativo {
+  background: #eef8f0;
+  color: #14532d;
+}
+
+.cadastro__situacao--inativo {
+  background: #f2f2f2;
+  color: #666;
+}
+
+.cadastro__sigla {
+  display: inline-block;
+  min-width: 38px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #000;
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* ---- Formulário ---- */
+.cadastro__voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #000;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.cadastro__voltar:hover {
+  color: #c40000;
+}
+
+.cadastro__interruptor {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  font-size: 0.98rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cadastro__interruptor input {
+  width: 18px;
+  height: 18px;
+  accent-color: #e30000;
+}
+
+.cadastro__acoes-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.cadastro__acoes-form > div {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.cadastro__excluir {
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid #c40000;
+  border-radius: 4px;
+  background: #fff;
+  color: #c40000;
+  font: inherit;
+  cursor: pointer;
+}
+
+.cadastro__excluir:hover:not(:disabled) {
+  background: #fdecec;
+}
+
+.cadastro__excluir:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+/* ---- Usuários vinculados à turma ---- */
+.cadastro__vinculados {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cadastro__vinculado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #ededed;
+}
+
+.cadastro__vinculado:last-child {
+  border-bottom: 0;
+}
+
+.cadastro__vincular {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.cadastro__vincular .campo {
+  flex: 1;
+}
+
+@media (max-width: 760px) {
+  .cadastro__filtros,
+  .cadastro__filtros--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cadastro__filtros > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .cadastro__novo {
+    width: 100%;
+  }
+
+  .cadastro__ocultar-movel {
+    display: none;
+  }
+
+  .cadastro__vincular {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.cadastro__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

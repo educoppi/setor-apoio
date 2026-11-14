@@ -3,7 +3,8 @@ import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import AlunosTurmaModal from "../../components/AlunosTurmaModal/AlunosTurmaModal";
 import Header from "../../components/Header/Header";
 import ModalidadeAccordion from "../../components/ModalidadeAccordion/ModalidadeAccordion";
-import TurmaModal from "../../components/TurmaModal/TurmaModal";
+import CursosModal from "../../components/Cadastros/CursosModal";
+import TurmasModal from "../../components/Cadastros/TurmasModal";
 import { getToken } from "../../services/api";
 import { buscarUsuarioLogado, getUsuario, logout } from "../../services/auth";
 import { listarTurmas } from "../../services/turmas";
@@ -16,6 +17,26 @@ const MODALIDADES = [
   { sigla: "CAI", titulo: "Curso de Aprendizagem Industrial" },
   { sigla: "CST", titulo: "Curso Superior de Tecnologia" },
 ];
+
+function IconeTurmas() {
+  return (
+    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3 19a6 6 0 0 1 12 0" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M15.5 14.2A5 5 0 0 1 21 19" />
+    </svg>
+  );
+}
+
+function IconeCursos() {
+  return (
+    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 9l10-5 10 5-10 5z" />
+      <path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5" />
+    </svg>
+  );
+}
 
 function getSaudacao(data = new Date()) {
   const hora = data.getHours();
@@ -40,8 +61,8 @@ export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
   const [usuario, setUsuario] = useState(getUsuario);
-  const [modalTurmaAberto, setModalTurmaAberto] = useState(false);
-  const [mensagem, setMensagem] = useState("");
+  // Cadastro aberto: "turmas", "cursos" ou null.
+  const [cadastroAberto, setCadastroAberto] = useState(null);
   const [turmas, setTurmas] = useState([]);
   const [carregandoTurmas, setCarregandoTurmas] = useState(true);
   const [erroTurmas, setErroTurmas] = useState("");
@@ -94,7 +115,7 @@ export default function Home() {
     if (location.state?.turmaId) navigate(location.pathname, { replace: true, state: null });
   }, [location.state, location.pathname, navigate]);
 
-  const fecharModalTurma = useCallback(() => setModalTurmaAberto(false), []);
+  const fecharCadastro = useCallback(() => setCadastroAberto(null), []);
   const fecharModalAlunos = useCallback(() => setTurmaAbertaId(null), []);
 
   // Só existe depois que a lista carrega (e some se a turma deixar de existir).
@@ -110,19 +131,8 @@ export default function Home() {
     navigate("/alunos/novo");
   }
 
-  function handleNovaTurma() {
-    setMensagem("");
-    setModalTurmaAberto(true);
-  }
-
   function handleSelecionarAluno(aluno) {
     navigate(`/alunos/${aluno.id}?turma=${turmaAbertaId}`);
-  }
-
-  function handleTurmaCriada(turma) {
-    setModalTurmaAberto(false);
-    setMensagem(`Turma "${turma.nome}" (${turma.cursoNome}) criada com sucesso.`);
-    carregarTurmas();
   }
 
   return (
@@ -139,16 +149,17 @@ export default function Home() {
             + ALUNO
           </button>
 
-          <button className="home__botao" type="button" onClick={handleNovaTurma}>
-            + TURMA
-          </button>
+          <div className="home__cadastros">
+            <button className="home__cadastro" type="button" onClick={() => setCadastroAberto("turmas")}>
+              <IconeTurmas />
+              Turmas
+            </button>
+            <button className="home__cadastro" type="button" onClick={() => setCadastroAberto("cursos")}>
+              <IconeCursos />
+              Cursos
+            </button>
+          </div>
         </div>
-
-        {mensagem && (
-          <p className="home__mensagem" role="status">
-            {mensagem}
-          </p>
-        )}
 
         <div className="home__modalidades">
           {carregandoTurmas && <p className="home__aviso">Carregando turmas...</p>}
@@ -183,8 +194,11 @@ export default function Home() {
         />
       )}
 
-      {modalTurmaAberto && (
-        <TurmaModal onFechar={fecharModalTurma} onCriada={handleTurmaCriada} />
+      {cadastroAberto === "turmas" && (
+        <TurmasModal onFechar={fecharCadastro} onAlterado={carregarTurmas} onNaoAutenticado={tratarNaoAutenticado} />
+      )}
+      {cadastroAberto === "cursos" && (
+        <CursosModal onFechar={fecharCadastro} onAlterado={carregarTurmas} onNaoAutenticado={tratarNaoAutenticado} />
       )}
     </div>
   );
