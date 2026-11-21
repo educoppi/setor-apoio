@@ -1,0 +1,71 @@
+.campo-cidade__caixa {
+  position: relative;
+}
+
+.campo-cidade__input {
+  padding-right: 52px;
+}
+
+.campo--destaque .campo-cidade__input {
+  padding-right: 56px;
+}
+
+/* Mesma seta dos selects (abre a lista de cidades). */
+.campo-cidade__seta {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 48px;
+  height: 100%;
+  border: 0;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat center / 20px;
+  cursor: pointer;
+}
+
+.campo-cidade__input[aria-expanded="true"] + .campo-cidade__seta {
+  transform: rotate(180deg);
+}
+
+.campo-cidade__lista {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  max-height: 320px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  border: 1px solid #c4c4c4;
+  border-radius: 8px;
+  background: #fff;
+  list-style: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+}
+
+.campo-cidade__opcao {
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.campo-cidade__opcao--ativa {
+  background: #fdf0f0;
+}
+
+.campo-cidade__opcao--escolhida .campo-cidade__nome {
+  font-weight: 600;
+}
+
+.campo-cidade__vazio,
+.campo-cidade__mais {
+  padding: 10px;
+  color: #666;
+  font-size: 0.88rem;
+}
+
+.campo-cidade__mais {
+  border-top: 1px solid #ededed;
+  margin-top: 4px;
+}

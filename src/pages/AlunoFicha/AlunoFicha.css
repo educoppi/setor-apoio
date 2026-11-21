@@ -423,3 +423,57 @@
     padding: 24px 20px;
   }
 }
+
+/* ---- Situação do aluno na turma (vínculo), abaixo do campo Turma ---- */
+.ficha__situacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  color: #444;
+  font-size: 0.85rem;
+}
+
+.ficha__situacao-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ficha__situacao-selo::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.ficha__situacao-selo--andamento {
+  background: #eef8f0;
+  color: #14532d;
+}
+
+.ficha__situacao-selo--concluido {
+  background: #ececec;
+  color: #333;
+}
+
+.ficha__situacao-selo--trancado {
+  background: #fff4dc;
+  color: #7a4a00;
+}
+
+.ficha__situacao-selo--encerrado {
+  background: #fdecec;
+  color: #b00000;
+}
+
+.ficha__campo--matricula {
+  min-width: 0;
+}

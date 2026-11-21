@@ -2,17 +2,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Abas from "../../components/Abas/Abas";
 import Campo from "../../components/Campo/Campo";
+import CampoCidade from "../../components/CampoCidade/CampoCidade";
 import FotoAluno from "../../components/FotoAluno/FotoAluno";
 import Header from "../../components/Header/Header";
 import InformacoesPessoais from "../../components/InformacoesPessoais/InformacoesPessoais";
 import InformacoesQualitativas from "../../components/InformacoesQualitativas/InformacoesQualitativas";
+import MatriculasAluno from "../../components/MatriculasAluno/MatriculasAluno";
 import OcorrenciasAluno from "../../components/OcorrenciasAluno/OcorrenciasAluno";
 import useImagemProtegida from "../../hooks/useImagemProtegida";
 import {
   adicionarVinculo,
   atualizarAluno,
   buscarAluno,
-  CIDADES,
   criarAluno,
   SITUACOES_VINCULO,
 } from "../../services/alunos";
@@ -41,6 +42,7 @@ const ABAS = [
   { id: "pessoais", rotulo: "Informações Pessoais" },
   { id: "qualitativas", rotulo: "Qualitativas" },
   { id: "ocorrencias", rotulo: "Ocorrências" },
+  { id: "matriculas", rotulo: "Matrículas" },
 ];
 const ID_ABAS = "ficha-aluno";
 const ORDEM_CAMPOS = [...CAMPOS_TOPO, ...CAMPOS_PESSOAIS];
@@ -93,14 +95,18 @@ function descreverTurma(turma) {
   return partes.filter(Boolean).join(" · ");
 }
 
+// A situação do vínculo aparece à parte, num selo abaixo do campo Turma.
 function descreverVinculo(vinculo) {
-  const situacao = SITUACOES_VINCULO[vinculo.situacao] ?? vinculo.situacao;
-  const partes = [
-    vinculo.turma && descreverTurma(vinculo.turma),
-    vinculo.situacao !== "EM_ANDAMENTO" && `Matrícula: ${situacao}`,
-  ];
-  return partes.filter(Boolean).join(" · ");
+  return vinculo.turma ? descreverTurma(vinculo.turma) : "";
 }
+
+const CLASSES_SITUACAO = {
+  EM_ANDAMENTO: "andamento",
+  CONCLUIDO: "concluido",
+  TRANCADO: "trancado",
+  CANCELADO: "encerrado",
+  EVADIDO: "encerrado",
+};
 
 function IconeVoltar() {
   return (
@@ -295,11 +301,6 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     aba.id === "pessoais" ? { ...aba, alerta: errosNaAbaPessoal } : aba,
   );
   const turmaSelecionada = turmasDisponiveis.find((turma) => String(turma.id) === form.turmaId);
-  // Fichas antigas/importadas podem ter uma cidade fora da lista: ela vira uma opção extra.
-  const cidades =
-    form.cidade && !CIDADES.some((cidade) => cidade.valor === form.cidade)
-      ? [...CIDADES, { valor: form.cidade, rotulo: form.cidade.toUpperCase() }]
-      : CIDADES;
   const alterado = Boolean(foto) || formAlterado(form, formBase);
   // Resumo "vivo": acompanha as correções do usuário depois da primeira tentativa.
   const totalInvalidos =
@@ -478,6 +479,28 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     navigate("/home", turmaOrigemId ? { state: { turmaId: Number(turmaOrigemId) } } : undefined);
   }
 
+  // Matrículas alteradas na aba (nova turma, nova situação): atualiza o aluno e
+  // o vínculo exibido no topo. Se ainda não havia vínculo, passa a exibir um.
+  function handleVinculosChange(lista) {
+    setAluno((atual) => (atual ? { ...atual, vinculos: lista } : atual));
+    const mesmo = vinculo && lista.find((v) => v.id === vinculo.id);
+    if (mesmo) {
+      setVinculo(mesmo);
+      return;
+    }
+    const escolhido = escolherVinculo(lista, turmaOrigemId);
+    if (escolhido) exibirVinculo(escolhido);
+  }
+
+  function exibirVinculo(escolhido) {
+    setVinculo(escolhido);
+    setForm((atual) => ({
+      ...atual,
+      matricula: escolhido.matricula ?? "",
+      turmaId: escolhido.turma?.id ? String(escolhido.turma.id) : "",
+    }));
+  }
+
   function handleRecarregarAluno() {
     setCarregandoAluno(true);
     setErroAluno("");
@@ -562,14 +585,26 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
               readOnly={fichaBloqueada}
             />
 
-            <Campo
-              {...campoTopo("matricula")}
-              rotulo="Nº Matrícula"
-              placeholder="Nº Matrícula"
-              maxLength={LIMITES.matricula}
-              autoComplete="off"
-              readOnly={vinculoBloqueado}
-            />
+            {/* Matrícula + situação do aluno na turma (vínculo), na mesma célula da grade. */}
+            <div className="ficha__campo--matricula">
+              <Campo
+                {...campoTopo("matricula")}
+                rotulo="Nº Matrícula"
+                placeholder="Nº Matrícula"
+                maxLength={LIMITES.matricula}
+                autoComplete="off"
+                readOnly={vinculoBloqueado}
+              />
+
+              {vinculo && (
+                <p className="ficha__situacao">
+                  Situação na turma:
+                  <span className={`ficha__situacao-selo ficha__situacao-selo--${CLASSES_SITUACAO[vinculo.situacao] ?? "encerrado"}`}>
+                    {SITUACOES_VINCULO[vinculo.situacao] ?? vinculo.situacao}
+                  </span>
+                </p>
+              )}
+            </div>
 
             <div className="ficha__campo--turma">
               <Campo
@@ -605,19 +640,17 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
               )}
             </div>
 
-            <Campo
-              {...campoTopo("cidade")}
-              as="select"
+            {/* Municípios de SP, dos mais próximos de São Carlos aos mais distantes. */}
+            <CampoCidade
+              id="aluno-cidade"
               rotulo="Cidade"
-              disabled={fichaBloqueada}
-            >
-              <option value="">CIDADE</option>
-              {cidades.map((cidade) => (
-                <option key={cidade.valor} value={cidade.valor}>
-                  {cidade.rotulo}
-                </option>
-              ))}
-            </Campo>
+              valor={form.cidade}
+              onChange={(nome) => handleChange({ target: { name: "cidade", value: nome } })}
+              onBlur={handleBlur}
+              erro={erroDe("cidade")}
+              obrigatorio
+              somenteLeitura={fichaBloqueada}
+            />
 
             {modo !== "view" && (
               <p className="ficha__legenda">
@@ -732,6 +765,17 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
                   onChange={handleChange}
                   ativa={abaAtiva === aba.id}
                   somenteLeitura={fichaBloqueada}
+                />
+              )}
+              {aba.id === "matriculas" && (
+                <MatriculasAluno
+                  aluno={aluno}
+                  vinculoExibidoId={vinculo?.id}
+                  turmas={turmas}
+                  carregandoTurmas={carregandoTurmas}
+                  onVinculosChange={handleVinculosChange}
+                  onExibir={exibirVinculo}
+                  onNaoAutenticado={tratarNaoAutenticado}
                 />
               )}
               {aba.id === "ocorrencias" && (

@@ -1,0 +1,259 @@
+.matriculas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.matriculas__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.matriculas__titulo {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.matriculas__subtitulo {
+  margin: 4px 0 0;
+  color: #555;
+  font-size: 0.92rem;
+}
+
+.matriculas__nova {
+  flex-shrink: 0;
+  height: 54px;
+  padding: 0 24px;
+  border: 1px solid #c4c4c4;
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  font: inherit;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.25);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.matriculas__nova:hover {
+  border-color: #e30000;
+  color: #e30000;
+}
+
+.matriculas__nova:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: 3px;
+}
+
+.matriculas__aviso,
+.matriculas__vazio {
+  margin: 0;
+  color: #555;
+}
+
+.matriculas__vazio {
+  padding: 30px 20px;
+  border: 1px dashed #bdbdbd;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+}
+
+/* ---- Nova matrícula ---- */
+.matriculas__form {
+  padding: 18px 20px;
+  border: 1px solid #e30000;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.matriculas__form h4 {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.matriculas__form-grade {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(200px, 2fr) minmax(150px, 1fr);
+  gap: 16px;
+}
+
+.matriculas__form-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.matriculas__botao {
+  height: 42px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 4px;
+  background: #e30000;
+  color: #fff;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.matriculas__botao:hover:not(:disabled) {
+  background: #c40000;
+}
+
+.matriculas__botao:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.matriculas__botao--secundario {
+  border: 1px solid #b5b5b5;
+  background: #fff;
+  color: #000;
+}
+
+.matriculas__botao--secundario:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+
+/* ---- Lista ---- */
+.matriculas__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.matriculas__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px 24px;
+  padding: 16px 20px;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.matriculas__item--exibido {
+  border-left: 4px solid #e30000;
+}
+
+.matriculas__turma {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.matriculas__turma-nome {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.matriculas__turma-info,
+.matriculas__numero {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.matriculas__numero {
+  color: #333;
+  font-weight: 500;
+}
+
+.matriculas__situacao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.matriculas__select {
+  height: 36px;
+  padding: 0 32px 0 10px;
+  border: 1px solid #b5b5b5;
+  border-radius: 6px;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 16px;
+  color: #000;
+  font: inherit;
+  font-size: 0.9rem;
+  appearance: none;
+  cursor: pointer;
+}
+
+.matriculas__select:focus-visible {
+  outline: none;
+  border-color: #e30000;
+  box-shadow: 0 0 0 3px rgba(227, 0, 0, 0.15);
+}
+
+.matriculas__select:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.matriculas__salvando {
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.matriculas__acoes {
+  text-align: right;
+}
+
+.matriculas__exibida {
+  color: #b00000;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.matriculas__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c40000;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.matriculas__rotulo-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .matriculas__cabecalho {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .matriculas__form-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .matriculas__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .matriculas__acoes {
+    text-align: left;
+  }
+}

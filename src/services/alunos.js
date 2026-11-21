@@ -1,13 +1,7 @@
 import { buscarTodasPaginas, request } from "./api";
 
-// `cidade` do aluno é texto livre na API (ex.: "São Carlos"); não confundir com
-// a `unidade` da turma, que é um enum. O valor enviado segue o formato do exemplo
-// do contrato; o rótulo é só para exibição.
-export const CIDADES = [
-  { valor: "São Carlos", rotulo: "SÃO CARLOS" },
-  { valor: "Descalvado", rotulo: "DESCALVADO" },
-  { valor: "Santa Rita do Passa Quatro", rotulo: "SANTA RITA DO PASSA QUATRO" },
-];
+// `cidade` do aluno é texto livre na API (ex.: "São Carlos"); a ficha oferece os
+// municípios de SP de src/data/cidadesSP.js. Não confundir com a `unidade` da turma (enum).
 
 // Valores do enum `situacaoProfissional` do AlunoRequest.
 export const SITUACOES_PROFISSIONAIS = [
@@ -54,4 +48,14 @@ export function criarAluno(aluno) {
 // com { matricula, turmaId, situacao } (VinculoRequest).
 export function adicionarVinculo(alunoId, vinculo) {
   return request(`/api/v1/alunos/${alunoId}/vinculos`, { method: "POST", body: vinculo });
+}
+
+// Todas as matrículas (vínculos acadêmicos) do aluno, com a turma de cada uma.
+export function listarVinculos(alunoId) {
+  return request(`/api/v1/alunos/${alunoId}/vinculos`);
+}
+
+// Trancado, evadido, concluído... (SituacaoVinculoRequest). Devolve o VinculoResponse atualizado.
+export function alterarSituacaoVinculo(vinculoId, situacao) {
+  return request(`/api/v1/vinculos/${vinculoId}/situacao`, { method: "PATCH", body: { situacao } });
 }
