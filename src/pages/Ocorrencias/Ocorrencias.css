@@ -1,0 +1,152 @@
+/* Reaproveita Solicitacoes.css e Atendimentos.css (topo, cartões, avisos). */
+.ocorrencias__filtros {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.6fr) repeat(2, minmax(150px, 1fr)) repeat(2, minmax(140px, 0.8fr)) minmax(180px, 1fr);
+  align-items: start;
+  gap: 14px;
+  margin-top: 32px;
+}
+
+.ocorrencias__descricao {
+  -webkit-line-clamp: 3;
+}
+
+.ocorrencias__extras {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.ocorrencias__resumo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ocorrencias__botao-texto {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #e30000;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ocorrencias__botao-texto:hover {
+  text-decoration: underline;
+}
+
+.ocorrencias__botao-texto:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: 2px;
+}
+
+/* ---- Filtro de aluno (busca por nome) ---- */
+.ocorrencias__aluno {
+  position: relative;
+}
+
+.ocorrencias__aluno-lista {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  max-height: 280px;
+  margin: 0;
+  padding: 6px 0;
+  overflow-y: auto;
+  border: 1px solid #c4c4c4;
+  border-radius: 6px;
+  background: #fff;
+  list-style: none;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ocorrencias__aluno-opcao {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: #000;
+  font: inherit;
+  font-size: 0.95rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ocorrencias__aluno-opcao:hover,
+.ocorrencias__aluno-opcao:focus-visible {
+  outline: none;
+  background: #fdecec;
+}
+
+.ocorrencias__aluno-aviso {
+  padding: 9px 12px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.ocorrencias__aluno-escolhido {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 6px 0 12px;
+  border: 1px solid #e30000;
+  border-radius: 6px;
+  background: #fdecec;
+}
+
+.ocorrencias__aluno-nome {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ocorrencias__aluno-limpar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #000;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ocorrencias__aluno-limpar:hover {
+  background: #f8d0d0;
+}
+
+.ocorrencias__aluno-limpar:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: 1px;
+}
+
+@media (max-width: 1200px) {
+  .ocorrencias__filtros {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .ocorrencias__filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ocorrencias__aluno {
+    grid-column: 1 / -1;
+  }
+}

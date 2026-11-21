@@ -59,3 +59,9 @@ export function listarVinculos(alunoId) {
 export function alterarSituacaoVinculo(vinculoId, situacao) {
   return request(`/api/v1/vinculos/${vinculoId}/situacao`, { method: "PATCH", body: { situacao } });
 }
+
+// Busca por nome (GET /alunos?busca=), para escolher um aluno num filtro.
+export function buscarAlunosPorNome(busca, tamanho = 8) {
+  const query = new URLSearchParams({ busca, page: 0, size: tamanho, sort: "nome,ASC" });
+  return request(`/api/v1/alunos?${query}`);
+}

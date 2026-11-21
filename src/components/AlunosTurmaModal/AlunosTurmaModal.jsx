@@ -25,6 +25,11 @@ function IconeVoltar() {
   );
 }
 
+// Comparação sem acentos e sem diferenciar maiúsculas ("joao" encontra "João").
+function normalizar(texto = "") {
+  return texto.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
+
 function CartaoAluno({ aluno, turmaId, onSelecionar }) {
   const foto = useImagemProtegida(aluno.fotoUrl);
   const [fotoComFalha, setFotoComFalha] = useState(null);
@@ -59,6 +64,7 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
   const [tentativa, setTentativa] = useState(0);
+  const [busca, setBusca] = useState("");
   const voltarRef = useRef(null);
 
   useEffect(() => {
@@ -121,10 +127,15 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
     if (event.target === event.currentTarget && !importando) onFechar();
   }
 
+  // A lista da turma já vem inteira; a pesquisa por nome filtra aqui mesmo.
+  const termo = normalizar(busca);
+  const alunosVisiveis = termo ? alunos.filter((aluno) => normalizar(aluno.nome).includes(termo)) : alunos;
+
   let resumo = "";
   if (!carregando && !erro) {
     resumo = alunos.length === 1 ? "1 aluno" : `${alunos.length} alunos`;
   }
+  const mostraBusca = !carregando && !erro && alunos.length > 0;
 
   return (
     <div className="alunos-turma__fundo" onMouseDown={handleFundoMouseDown}>
@@ -167,14 +178,57 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
             />
           ) : (
           <>
-          {podeImportar && (
+          {(podeImportar || mostraBusca) && (
             <div className="alunos-turma__ferramentas">
+              {mostraBusca && (
+                <div className="alunos-turma__busca" role="search">
+                  <label className="alunos-turma__busca-rotulo" htmlFor="alunos-turma-busca">
+                    Pesquisar aluno por nome
+                  </label>
+                  <svg className="alunos-turma__busca-icone" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M20 20l-4-4" />
+                  </svg>
+                  <input
+                    id="alunos-turma-busca"
+                    className="alunos-turma__busca-campo"
+                    type="text"
+                    placeholder="Pesquisar aluno por nome"
+                    value={busca}
+                    autoComplete="off"
+                    onChange={(e) => setBusca(e.target.value)}
+                    onKeyDown={(e) => {
+                      // Esc limpa a pesquisa antes de fechar o modal.
+                      if (e.key === "Escape" && busca) {
+                        e.stopPropagation();
+                        setBusca("");
+                      }
+                    }}
+                    aria-describedby={termo ? "alunos-turma-busca-resultado" : undefined}
+                  />
+                  {busca && (
+                    <button
+                      type="button"
+                      className="alunos-turma__busca-limpar"
+                      onClick={() => {
+                        setBusca("");
+                        document.getElementById("alunos-turma-busca")?.focus();
+                      }}
+                      aria-label="Limpar pesquisa"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              )}
+              {podeImportar && (
               <button type="button" className="alunos-turma__importar" onClick={() => setImportando(true)}>
                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
                 </svg>
                 Importar alunos (CSV)
               </button>
+              )}
             </div>
           )}
 
@@ -196,9 +250,17 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
             </p>
           )}
 
-          {!carregando && !erro && alunos.length > 0 && (
+          {mostraBusca && termo && (
+            <p className="alunos-turma__busca-resultado" id="alunos-turma-busca-resultado" role="status">
+              {alunosVisiveis.length === 0
+                ? `Nenhum aluno encontrado para “${busca.trim()}”.`
+                : `${alunosVisiveis.length} de ${alunos.length} ${alunos.length === 1 ? "aluno" : "alunos"}`}
+            </p>
+          )}
+
+          {mostraBusca && alunosVisiveis.length > 0 && (
             <ul className="alunos-turma__lista">
-              {alunos.map((aluno) => (
+              {alunosVisiveis.map((aluno) => (
                 <CartaoAluno
                   key={aluno.id}
                   aluno={aluno}

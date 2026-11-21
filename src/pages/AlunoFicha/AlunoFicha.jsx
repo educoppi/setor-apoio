@@ -127,7 +127,8 @@ function IconeVoltar() {
 // - aba: aba inicial (ex.: "ocorrencias");
 // - novaOcorrencia: id de solicitação — abre o registro de ocorrência já associado a ela;
 // - ocorrencia: id de uma ocorrência a destacar no histórico;
-// - origem=atendimentos: o voltar leva às solicitações recebidas.
+// - origem=atendimentos: o voltar leva às solicitações recebidas;
+// - origem=ocorrencias: o voltar leva à lista de todas as ocorrências.
 // A `key` remonta a ficha ao trocar de aluno, sem herdar estado do anterior.
 export default function AlunoFichaPagina() {
   const { id } = useParams();
@@ -462,6 +463,10 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     // Veio das solicitações recebidas: volta para elas.
     if (pedidos.origem === "atendimentos") {
       navigate("/atendimentos");
+      return;
+    }
+    if (pedidos.origem === "ocorrencias") {
+      navigate("/ocorrencias");
       return;
     }
     // Veio do modal de uma turma: volta para a página inicial com ele aberto.

@@ -24,15 +24,37 @@ function IconeSino() {
   );
 }
 
+function IconeOcorrencias() {
+  return (
+    <svg
+      className="header__sino-icone"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="5" y="4" width="14" height="17" rx="2" />
+      <path d="M9 4V3h6v1" />
+      <path d="M9 2.5h6v3H9z" />
+      <path d="M8.5 10h7M8.5 13.5h7M8.5 17h4" />
+    </svg>
+  );
+}
+
 // `role` vem do usuário logado:
 // - administrador: atalho para as ferramentas do administrador;
 // - solicitante: sem sino (acompanha tudo na própria área de solicitações);
 // - demais (operacional): sino que leva às solicitações recebidas pelo setor.
+// Administrador e operacional também têm o atalho para todas as ocorrências.
 export default function Header({ nome = "", role }) {
   const navigate = useNavigate();
   const admin = role === ROLE_ADMIN;
   const solicitante = role === ROLE_SOLICITANTE;
   const mostraSino = Boolean(role) && !admin && !solicitante;
+  const mostraOcorrencias = Boolean(role) && !solicitante;
 
   // O ponto vermelho indica que há solicitações aguardando atendimento.
   const [aguardando, setAguardando] = useState(0);
@@ -57,6 +79,18 @@ export default function Header({ nome = "", role }) {
       </Link>
 
       <div className="header__acoes">
+        {mostraOcorrencias && (
+          <button
+            className="header__sino header__ocorrencias"
+            type="button"
+            onClick={() => navigate("/ocorrencias")}
+            title="Todas as ocorrências"
+            aria-label="Todas as ocorrências"
+          >
+            <IconeOcorrencias />
+          </button>
+        )}
+
         {admin ? (
           <button
             className="header__admin"

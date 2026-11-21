@@ -53,3 +53,14 @@ export function criarCategoria(nome) {
 export function atualizarCategoria(id, { nome, ativo }) {
   return request(`/api/v1/categorias/${id}`, { method: "PUT", body: { nome, ativo } });
 }
+
+// GET /ocorrencias (paginado, mais recentes primeiro). Filtros opcionais:
+// alunoId, categoriaId, origem, de e ate (AAAA-MM-DD). Vazios não são enviados.
+// Disponível para o Setor de Apoio (operacional) e administradores.
+export function listarOcorrencias(filtros = {}, pagina = 0, tamanho = 10, ordem = "dataHora,DESC") {
+  const query = new URLSearchParams({ page: pagina, size: tamanho, sort: ordem });
+  for (const [chave, valor] of Object.entries(filtros)) {
+    if (valor !== undefined && valor !== null && valor !== "") query.set(chave, valor);
+  }
+  return request(`/api/v1/ocorrencias?${query}`);
+}
