@@ -424,16 +424,7 @@
   }
 }
 
-/* ---- Situação do aluno na turma (vínculo), abaixo do campo Turma ---- */
-.ficha__situacao {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 10px 0 0;
-  color: #444;
-  font-size: 0.85rem;
-}
+/* ---- Selo da situação da matrícula (usado na lista de turmas em andamento) ---- */
 
 .ficha__situacao-selo {
   display: inline-flex;
@@ -474,6 +465,126 @@
   color: #b00000;
 }
 
-.ficha__campo--matricula {
+
+/* ---- Turmas em andamento (topo da ficha cadastrada) ---- */
+.ficha__turmas-andamento {
+  grid-column: 1 / -1;
   min-width: 0;
+  padding: 14px 18px;
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.ficha__turmas-cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 16px;
+  margin-bottom: 8px;
+}
+
+.ficha__turmas-titulo {
+  margin: 0;
+  color: #444;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ficha__turmas-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #c40000;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.ficha__turmas-link:focus-visible {
+  outline: 2px solid #e30000;
+  outline-offset: 2px;
+}
+
+.ficha__turmas-vazio {
+  margin: 4px 0 2px;
+  color: #555;
+}
+
+.ficha__turmas-tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ficha__turmas-tabela th {
+  padding: 6px 12px 6px 0;
+  border-bottom: 1px solid #d6d6d6;
+  color: #666;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.ficha__turmas-tabela td {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid #ececec;
+  vertical-align: middle;
+}
+
+.ficha__turmas-tabela tr:last-child td {
+  border-bottom: 0;
+}
+
+.ficha__turmas-nome {
+  display: block;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.ficha__turmas-info {
+  display: block;
+  margin-top: 2px;
+  color: #666;
+  font-size: 0.82rem;
+}
+
+.ficha__turmas-matricula {
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .ficha__turmas-tabela thead {
+    display: none;
+  }
+
+  .ficha__turmas-tabela tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #ececec;
+  }
+
+  .ficha__turmas-tabela tr:last-child {
+    border-bottom: 0;
+  }
+
+  .ficha__turmas-tabela td {
+    padding: 0;
+    border: 0;
+  }
+
+  .ficha__turmas-tabela td:first-child {
+    grid-column: 1 / -1;
+  }
 }

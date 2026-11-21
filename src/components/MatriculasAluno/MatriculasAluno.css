@@ -133,7 +133,7 @@
 
 .matriculas__item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px 24px;
   padding: 16px 20px;
@@ -143,8 +143,9 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.matriculas__item--exibido {
-  border-left: 4px solid #e30000;
+/* Matrículas em andamento: as mesmas que aparecem no topo da ficha. */
+.matriculas__item--andamento {
+  border-left: 4px solid #1a7f37;
 }
 
 .matriculas__turma {
@@ -205,30 +206,8 @@
   font-size: 0.85rem;
 }
 
-.matriculas__acoes {
-  text-align: right;
-}
 
-.matriculas__exibida {
-  color: #b00000;
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
 
-.matriculas__link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: #c40000;
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  white-space: nowrap;
-  cursor: pointer;
-}
 
 .matriculas__rotulo-oculto {
   position: absolute;
@@ -253,7 +232,4 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .matriculas__acoes {
-    text-align: left;
-  }
 }

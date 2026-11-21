@@ -76,7 +76,9 @@ function excedeLimite(form, campo) {
 
 // Obrigatórios: os quatro campos do topo (regra da tela) + cpf e dataNascimento
 // (required no AlunoRequest). Os demais só são validados quando preenchidos.
-export function validar(form) {
+// Matrícula e turma só são pedidas na criação (primeira matrícula do aluno);
+// depois, as matrículas são geridas na aba Matrículas.
+export function validar(form, { criando = true } = {}) {
   const erros = {};
   const telefone = (campo) => {
     const digitos = somenteDigitos(form[campo]);
@@ -86,8 +88,8 @@ export function validar(form) {
   };
 
   if (!form.nome.trim()) erros.nome = "Informe o nome do aluno.";
-  if (!form.matricula.trim()) erros.matricula = "Informe o número da matrícula.";
-  if (!form.turmaId) erros.turmaId = "Selecione a turma.";
+  if (criando && !form.matricula.trim()) erros.matricula = "Informe o número da matrícula.";
+  if (criando && !form.turmaId) erros.turmaId = "Selecione a turma.";
   if (!form.cidade) erros.cidade = "Selecione a cidade.";
 
   if (!somenteDigitos(form.cpf)) erros.cpf = "Informe o CPF.";
@@ -155,17 +157,6 @@ export function montarVinculo(form) {
     turmaId: Number(form.turmaId),
     situacao: SITUACAO_VINCULO_INICIAL,
   };
-}
-
-// Vínculo exibido no topo da ficha: o da turma de onde o usuário veio; senão o
-// que está em andamento; senão o primeiro. null se o aluno não tem matrícula.
-export function escolherVinculo(vinculos = [], turmaId) {
-  if (vinculos.length === 0) return null;
-  return (
-    vinculos.find((vinculo) => turmaId && String(vinculo.turma?.id) === String(turmaId)) ??
-    vinculos.find((vinculo) => vinculo.situacao === SITUACAO_VINCULO_INICIAL) ??
-    vinculos[0]
-  );
 }
 
 // AlunoResponse (+ vínculo escolhido) -> estado do formulário, já com máscaras.

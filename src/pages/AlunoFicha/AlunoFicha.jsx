@@ -27,7 +27,6 @@ import {
   alunoParaForm,
   CAMPOS_PESSOAIS,
   CAMPOS_TOPO,
-  escolherVinculo,
   FORM_INICIAL,
   formAlterado,
   LIMITES,
@@ -168,10 +167,11 @@ export default function AlunoFichaPagina() {
 }
 
 // Ficha do aluno. Uma única tela para os modos:
-// - create: ficha nova (POST /alunos + POST /alunos/{id}/vinculos);
+// - create: ficha nova (POST /alunos + POST /alunos/{id}/vinculos da primeira matrícula);
 // - view: ficha cadastrada (GET /alunos/{id} ou logo após o POST), somente leitura;
-// - edit: ficha cadastrada em edição (PUT /alunos/{id}). Também usado quando o
-//   aluno ainda não tem matrícula: aí só matrícula e turma ficam liberadas.
+// - edit: ficha cadastrada em edição (PUT /alunos/{id}).
+// Fora da criação, o topo lista as turmas em andamento; as matrículas são
+// geridas na aba Matrículas.
 function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAberta }) {
   const navigate = useNavigate();
   const [usuario] = useState(getUsuario);
@@ -197,7 +197,6 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
   const fotoEnviada = useRef(null); // { arquivo, url } — evita reenviar a mesma foto
 
   const [aluno, setAluno] = useState(null); // AlunoResponse
-  const [vinculo, setVinculo] = useState(null); // VinculoResponse exibido no topo
   const [editando, setEditando] = useState(false);
   const [carregandoAluno, setCarregandoAluno] = useState(Boolean(alunoId) && idValido);
   const [erroAluno, setErroAluno] = useState(idValido ? "" : "Aluno não encontrado.");
@@ -209,11 +208,9 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
 
   let modo = "view";
   if (!aluno) modo = "create";
-  else if (editando || !vinculo) modo = "edit";
-  // A ficha só é editável na criação ou depois de clicar em Editar. O vínculo
-  // não tem PUT na API: matrícula e turma só são editáveis enquanto ele não existe.
+  else if (editando) modo = "edit";
+  // A ficha só é editável na criação ou depois de clicar em Editar.
   const fichaBloqueada = Boolean(aluno) && !editando;
-  const vinculoBloqueado = Boolean(vinculo);
   const fotoSalva = useImagemProtegida(aluno?.fotoUrl);
 
   const tratarNaoAutenticado = useCallback(
@@ -251,10 +248,8 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     buscarAluno(alunoId)
       .then((dados) => {
         if (!ativo) return;
-        const escolhido = escolherVinculo(dados.vinculos, turmaOrigemId);
         setAluno(dados);
-        setVinculo(escolhido);
-        setForm(alunoParaForm(dados, escolhido));
+        setForm(alunoParaForm(dados, null));
         setErroAluno("");
       })
       .catch((error) => {
@@ -265,7 +260,7 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     return () => {
       ativo = false;
     };
-  }, [alunoId, idValido, turmaOrigemId, tentativaAluno, tratarNaoAutenticado]);
+  }, [alunoId, idValido, tentativaAluno, tratarNaoAutenticado]);
 
   // Libera a pré-visualização anterior ao trocar de foto e ao sair da tela.
   useEffect(
@@ -275,17 +270,18 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     [foto],
   );
 
-  const errosValidacao = useMemo(() => validar(form), [form]);
-  // A turma do vínculo entra na lista mesmo que não venha em GET /turmas.
-  const turmasDisponiveis = useMemo(() => {
-    const turmaVinculo = vinculo?.turma;
-    if (!turmaVinculo || turmas.some((turma) => turma.id === turmaVinculo.id)) return turmas;
-    return [...turmas, turmaVinculo];
-  }, [turmas, vinculo]);
+  const criando = !aluno;
+  const errosValidacao = useMemo(() => validar(form, { criando }), [form, criando]);
+  const turmasDisponiveis = turmas;
   const gruposTurmas = useMemo(() => agruparTurmas(turmasDisponiveis), [turmasDisponiveis]);
-  const formBase = useMemo(
-    () => (aluno ? alunoParaForm(aluno, vinculo) : FORM_INICIAL),
-    [aluno, vinculo],
+  const formBase = useMemo(() => (aluno ? alunoParaForm(aluno, null) : FORM_INICIAL), [aluno]);
+  // Matrículas em andamento, das turmas mais recentes para as mais antigas.
+  const vinculosEmAndamento = useMemo(
+    () =>
+      (aluno?.vinculos ?? [])
+        .filter((v) => v.situacao === "EM_ANDAMENTO")
+        .sort((a, b) => (b.turma?.dataInicio ?? "").localeCompare(a.turma?.dataInicio ?? "")),
+    [aluno],
   );
 
   if (!getToken()) return <Navigate to="/" replace />;
@@ -379,33 +375,26 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
 
     let alunoAtual = aluno;
     let etapa = "ficha";
-    let acao = "";
     try {
-      // 1) Ficha do aluno: POST na criação, PUT na edição.
       if (!alunoAtual) {
+        // Criação: ficha (POST /alunos) e, em seguida, a primeira matrícula.
         const fotoUrl = await obterFotoUrl(fotoPadraoUrl());
         alunoAtual = await criarAluno(montarAluno(form, fotoUrl));
-        setAluno(alunoAtual);
-        acao = "cadastrado";
-      } else if (editando) {
+        etapa = "vinculo";
+        const primeira = await adicionarVinculo(alunoAtual.id, montarVinculo(form));
+        setAluno({ ...alunoAtual, vinculos: [primeira] });
+        setSucesso(`Aluno ${alunoAtual.nome} cadastrado com sucesso.`);
+      } else {
+        // Edição: só a ficha (PUT). As matrículas não fazem parte do corpo.
         const fotoUrl = await obterFotoUrl(alunoAtual.fotoUrl);
-        alunoAtual = await atualizarAluno(alunoAtual.id, montarAluno(form, fotoUrl));
-        setAluno(alunoAtual);
+        const atualizado = await atualizarAluno(alunoAtual.id, montarAluno(form, fotoUrl));
+        setAluno({ ...atualizado, vinculos: atualizado.vinculos ?? alunoAtual.vinculos });
         setEditando(false);
         setFoto(null);
-        acao = "atualizado";
+        setSucesso(`Aluno ${atualizado.nome} atualizado com sucesso.`);
       }
-
-      // 2) Matrícula na turma selecionada (só enquanto ainda não existe).
-      if (!vinculo) {
-        etapa = "vinculo";
-        setVinculo(await adicionarVinculo(alunoAtual.id, montarVinculo(form)));
-        acao ||= "matriculado";
-      }
-
       setTocados({});
       setTentouSalvar(false);
-      setSucesso(`Aluno ${alunoAtual.nome} ${acao} com sucesso.`);
     } catch (error) {
       if (tratarNaoAutenticado(error)) return;
 
@@ -416,11 +405,16 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
       }
       setErrosApi(errosCampos);
       const detalhe = error.message.replace(/\.$/, "");
-      setErroGeral(
-        etapa === "vinculo"
-          ? `${acao ? "A ficha do aluno foi salva, mas a" : "A"} matrícula na turma não foi registrada (${detalhe}). Revise a matrícula e a turma e clique em Salvar para concluir.`
-          : error.message,
-      );
+      if (etapa === "vinculo") {
+        // A ficha já existe: segue em visualização e a matrícula é feita na aba Matrículas.
+        setAluno({ ...alunoAtual, vinculos: [] });
+        setAbaAtiva("matriculas");
+        setErroGeral(
+          `A ficha do aluno foi criada, mas a matrícula na turma não foi registrada (${detalhe}). Use “+ NOVA MATRÍCULA” na aba Matrículas para concluir.`,
+        );
+      } else {
+        setErroGeral(error.message);
+      }
       const primeiro = ORDEM_CAMPOS.find((campo) => errosCampos[campo]);
       if (primeiro) focarCampo(primeiro);
     } finally {
@@ -448,7 +442,7 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
   function handleCancelarEdicao() {
     if (alterado && !window.confirm("Descartar as alterações feitas na ficha?")) return;
     limparEdicao();
-    setForm(alunoParaForm(aluno, vinculo));
+    setForm(alunoParaForm(aluno, null));
     setEditando(false);
   }
 
@@ -459,12 +453,7 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     ) {
       return;
     }
-    if (aluno && !vinculo && !alunoId) {
-      const sair = window.confirm(
-        "A matrícula do aluno na turma ainda não foi registrada. Deseja sair mesmo assim?",
-      );
-      if (!sair) return;
-    } else if ((!aluno || editando) && alterado) {
+    if ((!aluno || editando) && alterado) {
       const pergunta = aluno
         ? "Descartar as alterações feitas na ficha?"
         : "Descartar os dados preenchidos?";
@@ -479,26 +468,14 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
     navigate("/home", turmaOrigemId ? { state: { turmaId: Number(turmaOrigemId) } } : undefined);
   }
 
-  // Matrículas alteradas na aba (nova turma, nova situação): atualiza o aluno e
-  // o vínculo exibido no topo. Se ainda não havia vínculo, passa a exibir um.
+  // Matrículas alteradas na aba (nova turma, nova situação): a lista do topo acompanha.
   function handleVinculosChange(lista) {
     setAluno((atual) => (atual ? { ...atual, vinculos: lista } : atual));
-    const mesmo = vinculo && lista.find((v) => v.id === vinculo.id);
-    if (mesmo) {
-      setVinculo(mesmo);
-      return;
-    }
-    const escolhido = escolherVinculo(lista, turmaOrigemId);
-    if (escolhido) exibirVinculo(escolhido);
   }
 
-  function exibirVinculo(escolhido) {
-    setVinculo(escolhido);
-    setForm((atual) => ({
-      ...atual,
-      matricula: escolhido.matricula ?? "",
-      turmaId: escolhido.turma?.id ? String(escolhido.turma.id) : "",
-    }));
+  function abrirMatriculas() {
+    setAbaAtiva("matriculas");
+    requestAnimationFrame(() => document.querySelector(".ficha__barra")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
   function handleRecarregarAluno() {
@@ -542,8 +519,7 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
   }
 
   let dicaTurma;
-  if (vinculo) dicaTurma = descreverVinculo(vinculo);
-  else if (turmaSelecionada) dicaTurma = descreverTurma(turmaSelecionada);
+  if (turmaSelecionada) dicaTurma = descreverTurma(turmaSelecionada);
   else if (!carregandoTurmas && !erroTurmas && turmas.length === 0) {
     dicaTurma = "Nenhuma turma cadastrada. Cadastre uma turma na página inicial.";
   }
@@ -585,60 +561,95 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
               readOnly={fichaBloqueada}
             />
 
-            {/* Matrícula + situação do aluno na turma (vínculo), na mesma célula da grade. */}
-            <div className="ficha__campo--matricula">
-              <Campo
-                {...campoTopo("matricula")}
-                rotulo="Nº Matrícula"
-                placeholder="Nº Matrícula"
-                maxLength={LIMITES.matricula}
-                autoComplete="off"
-                readOnly={vinculoBloqueado}
-              />
+            {modo === "create" ? (
+              <>
+                {/* Primeira matrícula do aluno, criada junto com a ficha. */}
+                <Campo
+                  {...campoTopo("matricula")}
+                  rotulo="Nº Matrícula"
+                  placeholder="Nº Matrícula"
+                  maxLength={LIMITES.matricula}
+                  autoComplete="off"
+                />
 
-              {vinculo && (
-                <p className="ficha__situacao">
-                  Situação na turma:
-                  <span className={`ficha__situacao-selo ficha__situacao-selo--${CLASSES_SITUACAO[vinculo.situacao] ?? "encerrado"}`}>
-                    {SITUACOES_VINCULO[vinculo.situacao] ?? vinculo.situacao}
-                  </span>
-                </p>
-              )}
-            </div>
-
-            <div className="ficha__campo--turma">
-              <Campo
-                {...campoTopo("turmaId")}
-                as="select"
-                rotulo="Turma"
-                dica={dicaTurma}
-                disabled={vinculoBloqueado || carregandoTurmas || turmasDisponiveis.length === 0}
-                aria-busy={carregandoTurmas || undefined}
-              >
-                <option value="">
-                  {carregandoTurmas ? "Carregando turmas..." : "TURMA"}
-                </option>
-                {gruposTurmas.map((grupo) => (
-                  <optgroup key={grupo.sigla} label={grupo.titulo}>
-                    {grupo.turmas.map((turma) => (
-                      <option key={turma.id} value={turma.id}>
-                        {turma.nome} — {turma.cursoNome}
-                        {turma.ativo ? "" : " (inativa)"}
-                      </option>
+                <div className="ficha__campo--turma">
+                  <Campo
+                    {...campoTopo("turmaId")}
+                    as="select"
+                    rotulo="Turma"
+                    dica={dicaTurma}
+                    disabled={carregandoTurmas || turmasDisponiveis.length === 0}
+                    aria-busy={carregandoTurmas || undefined}
+                  >
+                    <option value="">
+                      {carregandoTurmas ? "Carregando turmas..." : "TURMA"}
+                    </option>
+                    {gruposTurmas.map((grupo) => (
+                      <optgroup key={grupo.sigla} label={grupo.titulo}>
+                        {grupo.turmas.map((turma) => (
+                          <option key={turma.id} value={turma.id}>
+                            {turma.nome} — {turma.cursoNome}
+                            {turma.ativo ? "" : " (inativa)"}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
-                  </optgroup>
-                ))}
-              </Campo>
-
-              {erroTurmas && (
-                <div className="ficha__turmas-erro" role="alert">
-                  <span>Não foi possível carregar as turmas: {erroTurmas}</span>
-                  <button type="button" onClick={handleRecarregarTurmas}>
-                    Tentar novamente
+                  </Campo>
+    
+                  {erroTurmas && (
+                    <div className="ficha__turmas-erro" role="alert">
+                      <span>Não foi possível carregar as turmas: {erroTurmas}</span>
+                      <button type="button" onClick={handleRecarregarTurmas}>
+                        Tentar novamente
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <section className="ficha__turmas-andamento" aria-labelledby="ficha-turmas-titulo">
+                <div className="ficha__turmas-cabecalho">
+                  <h2 className="ficha__turmas-titulo" id="ficha-turmas-titulo">
+                    Turmas em andamento
+                  </h2>
+                  <button type="button" className="ficha__turmas-link" onClick={abrirMatriculas}>
+                    {(aluno?.vinculos?.length ?? 0) > vinculosEmAndamento.length
+                      ? `Ver todas as matrículas (${aluno.vinculos.length})`
+                      : "Gerenciar matrículas"}
                   </button>
                 </div>
-              )}
-            </div>
+
+                {vinculosEmAndamento.length === 0 ? (
+                  <p className="ficha__turmas-vazio">Nenhuma matrícula em andamento.</p>
+                ) : (
+                  <table className="ficha__turmas-tabela">
+                    <thead>
+                      <tr>
+                        <th scope="col">Turma</th>
+                        <th scope="col">Nº Matrícula</th>
+                        <th scope="col">Situação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vinculosEmAndamento.map((v) => (
+                        <tr key={v.id}>
+                          <td>
+                            <span className="ficha__turmas-nome">{v.turma?.nome ?? "Turma"}</span>
+                            <span className="ficha__turmas-info">{descreverVinculo(v)}</span>
+                          </td>
+                          <td className="ficha__turmas-matricula">{v.matricula}</td>
+                          <td>
+                            <span className={`ficha__situacao-selo ficha__situacao-selo--${CLASSES_SITUACAO[v.situacao] ?? "encerrado"}`}>
+                              {SITUACOES_VINCULO[v.situacao] ?? v.situacao}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
+            )}
 
             {/* Municípios de SP, dos mais próximos de São Carlos aos mais distantes. */}
             <CampoCidade
@@ -770,11 +781,9 @@ function AlunoFicha({ alunoId, turmaOrigemId, pedidos = {}, onNovaOcorrenciaAber
               {aba.id === "matriculas" && (
                 <MatriculasAluno
                   aluno={aluno}
-                  vinculoExibidoId={vinculo?.id}
                   turmas={turmas}
                   carregandoTurmas={carregandoTurmas}
                   onVinculosChange={handleVinculosChange}
-                  onExibir={exibirVinculo}
                   onNaoAutenticado={tratarNaoAutenticado}
                 />
               )}

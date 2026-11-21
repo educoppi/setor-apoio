@@ -57,11 +57,9 @@ function SeloSituacao({ situacao }) {
 // situação de cada uma (PATCH /vinculos/{id}/situacao).
 export default function MatriculasAluno({
   aluno,
-  vinculoExibidoId,
   turmas,
   carregandoTurmas,
   onVinculosChange,
-  onExibir,
   onNaoAutenticado,
 }) {
   const vinculos = ordenar(aluno?.vinculos ?? []);
@@ -254,10 +252,9 @@ export default function MatriculasAluno({
       ) : (
         <ul className="matriculas__lista">
           {vinculos.map((vinculo) => {
-            const exibido = vinculo.id === vinculoExibidoId;
             const alterando = alterandoId === vinculo.id;
             return (
-              <li key={vinculo.id} className={`matriculas__item${exibido ? " matriculas__item--exibido" : ""}`}>
+              <li key={vinculo.id} className={`matriculas__item${vinculo.situacao === "EM_ANDAMENTO" ? " matriculas__item--andamento" : ""}`}>
                 <div className="matriculas__turma">
                   <span className="matriculas__turma-nome">{vinculo.turma?.nome ?? "Turma"}</span>
                   <span className="matriculas__turma-info">{descreverTurma(vinculo.turma)}</span>
@@ -286,15 +283,6 @@ export default function MatriculasAluno({
                   {alterando && <span className="matriculas__salvando">Salvando...</span>}
                 </div>
 
-                <div className="matriculas__acoes">
-                  {exibido ? (
-                    <span className="matriculas__exibida">Exibida no topo</span>
-                  ) : (
-                    <button type="button" className="matriculas__link" onClick={() => onExibir(vinculo)}>
-                      Exibir no topo
-                    </button>
-                  )}
-                </div>
               </li>
             );
           })}
