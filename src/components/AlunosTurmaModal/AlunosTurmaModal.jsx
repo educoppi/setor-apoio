@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useImagemProtegida from "../../hooks/useImagemProtegida";
 import { listarAlunosDaTurma, SITUACOES_VINCULO } from "../../services/alunos";
+import { getUsuario } from "../../services/auth";
 import { FOTO_PADRAO_CAMINHO } from "../../services/imagens";
+import { ROLE_ADMIN } from "../../services/usuarios";
+import ImportacaoAlunos from "./ImportacaoAlunos";
 import "./AlunosTurmaModal.css";
+
+// Importação de alunos: só o Setor de Apoio (operacional) e administradores.
+const PERFIS_IMPORTACAO = [ROLE_ADMIN, "OPERACIONAL"];
 
 function IconeVoltar() {
   return (
@@ -44,7 +50,11 @@ function CartaoAluno({ aluno, turmaId, onSelecionar }) {
 }
 
 // Modal com todos os alunos matriculados na turma (GET /alunos?turmaId=).
+// Perfis do setor também importam alunos por CSV numa segunda visão do modal.
 export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, onNaoAutenticado }) {
+  const podeImportar = PERFIS_IMPORTACAO.includes(getUsuario()?.role);
+  const [importando, setImportando] = useState(false);
+  const [enviandoImportacao, setEnviandoImportacao] = useState(false);
   const [alunos, setAlunos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
@@ -69,9 +79,19 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
   }, [turma.id, tentativa, onNaoAutenticado]);
 
   // Esc fecha, o foco vai para o modal e a página de fundo não rola.
+  const voltarOuFechar = useCallback(() => {
+    if (enviandoImportacao) return;
+    if (importando) setImportando(false);
+    else onFechar();
+  }, [importando, enviandoImportacao, onFechar]);
+  const voltarOuFecharRef = useRef(voltarOuFechar);
+  useEffect(() => {
+    voltarOuFecharRef.current = voltarOuFechar;
+  });
+
   useEffect(() => {
     function handleKeyDown(event) {
-      if (event.key === "Escape") onFechar();
+      if (event.key === "Escape") voltarOuFecharRef.current();
     }
     const focoAnterior = document.activeElement;
     const overflowAnterior = document.body.style.overflow;
@@ -83,7 +103,13 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
       document.body.style.overflow = overflowAnterior;
       focoAnterior?.focus?.();
     };
-  }, [onFechar]);
+  }, []);
+
+  function recarregarAlunos() {
+    setCarregando(true);
+    setErro("");
+    setTentativa((valor) => valor + 1);
+  }
 
   function handleTentarNovamente() {
     setCarregando(true);
@@ -92,7 +118,7 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
   }
 
   function handleFundoMouseDown(event) {
-    if (event.target === event.currentTarget) onFechar();
+    if (event.target === event.currentTarget && !importando) onFechar();
   }
 
   let resumo = "";
@@ -114,8 +140,9 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
             ref={voltarRef}
             type="button"
             className="alunos-turma__voltar"
-            onClick={onFechar}
-            aria-label="Fechar lista de alunos"
+            onClick={voltarOuFechar}
+            disabled={enviandoImportacao}
+            aria-label={importando ? "Voltar para a lista de alunos" : "Fechar lista de alunos"}
           >
             <IconeVoltar />
           </button>
@@ -124,12 +151,33 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
               {turma.nome}
             </h2>
             <p className="alunos-turma__resumo" id="alunos-turma-resumo">
-              {[turma.cursoNome, resumo].filter(Boolean).join(" · ")}
+              {importando ? "Importar alunos por CSV" : [turma.cursoNome, resumo].filter(Boolean).join(" · ")}
             </p>
           </div>
         </header>
 
         <div className="alunos-turma__corpo" aria-busy={carregando || undefined}>
+          {importando ? (
+            <ImportacaoAlunos
+              turma={turma}
+              onVoltar={() => setImportando(false)}
+              onImportou={recarregarAlunos}
+              onOcupadoChange={setEnviandoImportacao}
+              onNaoAutenticado={onNaoAutenticado}
+            />
+          ) : (
+          <>
+          {podeImportar && (
+            <div className="alunos-turma__ferramentas">
+              <button type="button" className="alunos-turma__importar" onClick={() => setImportando(true)}>
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 4v11M7 10l5 5 5-5M5 20h14" />
+                </svg>
+                Importar alunos (CSV)
+              </button>
+            </div>
+          )}
+
           {carregando && <p className="alunos-turma__aviso">Carregando alunos...</p>}
 
           {erro && (
@@ -142,7 +190,10 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
           )}
 
           {!carregando && !erro && alunos.length === 0 && (
-            <p className="alunos-turma__aviso">Nenhum aluno matriculado nesta turma.</p>
+            <p className="alunos-turma__aviso">
+              Nenhum aluno matriculado nesta turma.
+              {podeImportar && " Use “Importar alunos (CSV)” para cadastrar vários de uma vez."}
+            </p>
           )}
 
           {!carregando && !erro && alunos.length > 0 && (
@@ -156,6 +207,8 @@ export default function AlunosTurmaModal({ turma, onFechar, onSelecionarAluno, o
                 />
               ))}
             </ul>
+          )}
+          </>
           )}
         </div>
       </section>

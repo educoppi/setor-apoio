@@ -170,6 +170,45 @@
   white-space: nowrap;
 }
 
+/* ---- Ferramentas (importação) ---- */
+.alunos-turma__ferramentas {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 18px;
+}
+
+.alunos-turma__importar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid #e30000;
+  border-radius: 4px;
+  background: #fff;
+  color: #e30000;
+  font: inherit;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.alunos-turma__importar:hover {
+  background: #e30000;
+  color: #fff;
+}
+
+.alunos-turma__importar:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.alunos-turma__voltar:disabled {
+  cursor: wait;
+  opacity: 0.4;
+}
+
 /* ---- Estados ---- */
 .alunos-turma__aviso {
   margin: 24px 0;

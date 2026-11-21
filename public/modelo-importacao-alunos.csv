@@ -1,0 +1,5 @@
+cpf;nome;data_nascimento;matricula;email;celular;cep;rua;numero;bairro;cidade
+12345678909;Ana Beatriz Souza;15/03/2008;20260001;ana.souza@email.com;16991234567;13560000;Rua Episcopal;1200;Centro;São Carlos
+98765432100;Bruno Henrique Lima;2007-11-02;20260002;bruno.lima@email.com;16998765432;13566590;Avenida Trabalhador São-carlense;400;Parque Arnold Schimidt;São Carlos
+31415926590;Carla Dias;28/07/2008;20260003;;;;;;;
+27182818205;Diego Ferreira dos Santos;09/01/2009;20260004;diego.santos@email.com;1633221100;13560970;Rua Dona Alexandrina;55;Vila Pureza;Descalvado
