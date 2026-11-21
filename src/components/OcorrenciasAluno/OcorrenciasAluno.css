@@ -657,3 +657,8 @@ span.ocorrencia__miniatura-botao {
     margin-left: 0;
   }
 }
+
+/* CATEGORIA abre um modal (não uma lista suspensa): sem seta, padding simétrico. */
+.ocorrencia__suspensa-botao--modal {
+  padding: 0 24px;
+}

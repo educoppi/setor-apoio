@@ -15,6 +15,7 @@ import { listarTodasSolicitacoes, rotuloMotivo, rotuloStatus } from "../../servi
 import { ehAdministrador } from "../../services/usuarios";
 import { formatarDataHora } from "../../utils/formatos";
 import "../Solicitacoes/Solicitacoes.css";
+import CategoriasModal from "./CategoriasModal";
 import "./OcorrenciasAluno.css";
 
 const EDITOR_VAZIO = { origem: "", categoriaIds: [], descricao: "", imagens: [], solicitacaoIds: [] };
@@ -202,7 +203,8 @@ export default function OcorrenciasAluno({
   const [enviandoImagens, setEnviandoImagens] = useState(0);
   const inputImagemRef = useRef(null);
 
-  const [categorias, setCategorias] = useState([]);
+  const [categorias, setCategorias] = useState([]); // todas, ativas e inativas
+  const [categoriasAberto, setCategoriasAberto] = useState(false);
   const [solicitacoes, setSolicitacoes] = useState([]);
   const [carregandoSolicitacoes, setCarregandoSolicitacoes] = useState(false);
 
@@ -226,12 +228,13 @@ export default function OcorrenciasAluno({
     };
   }, [alunoId, recarga, onNaoAutenticado]);
 
-  // Categorias ativas e solicitações do aluno ainda não finalizadas, ao abrir o editor.
+  // Categorias (todas: o modal também reativa as inativas) e solicitações do
+  // aluno ainda não finalizadas, ao abrir o editor.
   const editorAberto = Boolean(editor);
   useEffect(() => {
     if (!editorAberto || !alunoId) return undefined;
     let ativo = true;
-    listarCategorias({ somenteAtivas: true })
+    listarCategorias({ somenteAtivas: false })
       .then((lista) => ativo && setCategorias(lista ?? []))
       .catch((error) => ativo && !onNaoAutenticado?.(error) && setErroEditor(`Não foi possível carregar as categorias: ${error.message}`));
     setCarregandoSolicitacoes(true);
@@ -457,9 +460,10 @@ export default function OcorrenciasAluno({
     const jaAssociadas = new Set(base.solicitacaoIds);
     const candidatas = solicitacoes.filter((s) => !s.ocorrenciaId || s.ocorrenciaId === idAtual || jaAssociadas.has(s.id));
     const vinculadasOutra = solicitacoes.filter((s) => s.ocorrenciaId && s.ocorrenciaId !== idAtual && !jaAssociadas.has(s.id));
-    const categoriasSelecionadas = categorias.filter((c) => form.categoriaIds.includes(c.id));
-    // Categorias inativas que já estavam na ocorrência continuam visíveis.
-    const categoriasInativas = (editor.original?.categorias ?? []).filter((c) => !categorias.some((a) => a.id === c.id));
+    // Categorias marcadas, na ordem da seleção; se ainda não carregaram, usa as da própria ocorrência.
+    const categoriasSelecionadas = form.categoriaIds
+      .map((id) => categorias.find((c) => c.id === id) ?? editor.original?.categorias?.find((c) => c.id === id))
+      .filter(Boolean);
 
     return (
       <div className="ocorrencia-editor" aria-label={idAtual ? "Editar ocorrência" : "Registrar ocorrência"} role="group">
@@ -516,28 +520,21 @@ export default function OcorrenciasAluno({
         </div>
 
         <div className="ocorrencia-editor__seletores">
-          <SelecaoSuspensa
-            id="ocorrencia-categorias"
-            rotulo="CATEGORIA"
-            resumo={form.categoriaIds.length}
-            erro={erros.categoriaIds}
-            desabilitado={salvando}
-          >
-            {categorias.length === 0 && categoriasInativas.length === 0 && <p className="ocorrencia__suspensa-vazio">Nenhuma categoria ativa cadastrada.</p>}
-            {[...categorias, ...categoriasInativas].map((categoria) => (
-              <label key={categoria.id} className="ocorrencia__opcao">
-                <input
-                  type="checkbox"
-                  checked={form.categoriaIds.includes(categoria.id)}
-                  onChange={() => alternarLista("categoriaIds", categoria.id)}
-                />
-                <span>
-                  {categoria.nome}
-                  {categoria.ativo === false && <small> (inativa)</small>}
-                </span>
-              </label>
-            ))}
-          </SelecaoSuspensa>
+          {/* CATEGORIA abre o modal: selecionar, criar e editar categorias. */}
+          <div className="ocorrencia__suspensa">
+            <button
+              id="ocorrencia-categorias"
+              type="button"
+              className={`ocorrencia__suspensa-botao ocorrencia__suspensa-botao--modal${erros.categoriaIds ? " ocorrencia__suspensa-botao--erro" : ""}`}
+              aria-haspopup="dialog"
+              onClick={() => setCategoriasAberto(true)}
+              disabled={salvando}
+            >
+              <span>CATEGORIA</span>
+              {form.categoriaIds.length > 0 && <span className="ocorrencia__suspensa-contagem">{form.categoriaIds.length}</span>}
+            </button>
+            {erros.categoriaIds && <p className="campo__erro">{erros.categoriaIds}</p>}
+          </div>
 
           <SelecaoSuspensa id="ocorrencia-solicitacoes" rotulo="Associar à solicitação" resumo={form.solicitacaoIds.length} desabilitado={salvando}>
             {carregandoSolicitacoes && <p className="ocorrencia__suspensa-vazio">Carregando solicitações...</p>}
@@ -586,9 +583,10 @@ export default function OcorrenciasAluno({
 
         {(categoriasSelecionadas.length > 0 || form.solicitacaoIds.length > 0) && (
           <div className="ocorrencia__tags ocorrencia-editor__selecionados">
-            {[...categoriasSelecionadas, ...categoriasInativas.filter((c) => form.categoriaIds.includes(c.id))].map((c) => (
+            {categoriasSelecionadas.map((c) => (
               <span key={`c${c.id}`} className="tag">
                 {c.nome}
+                {c.ativo === false && " (inativa)"}
               </span>
             ))}
             {form.solicitacaoIds.map((id) => (
@@ -637,6 +635,21 @@ export default function OcorrenciasAluno({
           </p>
         )}
         <p className="ocorrencia-editor__dica">Clique em SALVAR, na barra acima, para gravar a ocorrência.</p>
+
+        {categoriasAberto && (
+          <CategoriasModal
+            categorias={categorias}
+            selecionadas={form.categoriaIds}
+            onCategoriasChange={setCategorias}
+            onAplicar={(ids) => {
+              setForm((atual) => ({ ...atual, categoriaIds: ids }));
+              setErros((atual) => ({ ...atual, categoriaIds: undefined }));
+              setCategoriasAberto(false);
+            }}
+            onFechar={() => setCategoriasAberto(false)}
+            onNaoAutenticado={onNaoAutenticado}
+          />
+        )}
       </div>
     );
   }

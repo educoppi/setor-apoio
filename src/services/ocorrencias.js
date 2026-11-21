@@ -41,3 +41,15 @@ export function excluirOcorrencia(id) {
 export function listarCategorias({ somenteAtivas = true } = {}) {
   return request(`/api/v1/categorias?somenteAtivas=${somenteAtivas}`);
 }
+
+export const LIMITE_NOME_CATEGORIA = 50;
+
+// CategoriaRequest: { nome (até 50), ativo? (padrão true) }.
+export function criarCategoria(nome) {
+  return request("/api/v1/categorias", { method: "POST", body: { nome, ativo: true } });
+}
+
+// Renomeia, desativa ou reativa a categoria.
+export function atualizarCategoria(id, { nome, ativo }) {
+  return request(`/api/v1/categorias/${id}`, { method: "PUT", body: { nome, ativo } });
+}
